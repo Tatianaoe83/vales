@@ -12,14 +12,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Limpiar caché
+        // 1. Limpiar caché de permisos
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 2. CREAR TODOS LOS PERMISOS
+        // 2. CREAR TODOS LOS PERMISOS (Aquí faltaba 'manage clients')
         $permissions = [
             // --- GESTIÓN DEL SISTEMA ---
             'manage users',       
-            'manage roles',       
+            'manage roles',
+            'manage clients', // <--- ¡AQUÍ ESTABA EL FALTANTE! 🔑
             'view reports',       
 
             // --- OPERATIVOS (Ventas) ---
@@ -32,6 +33,7 @@ class DatabaseSeeder extends Seeder
             'report issue',       
         ];
 
+        // Este bucle crea los permisos en la base de datos
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
@@ -45,13 +47,24 @@ class DatabaseSeeder extends Seeder
         $roleAdmin->syncPermissions([
             'manage users',
             'manage roles', 
+            'manage clients', // <--- Asignado al Admin
             'view reports'
         ]);
 
-        $roleVentas->syncPermissions(['create tickets', 'print tickets']);
+        // 5. ASIGNAR PERMISOS A VENTAS
+        // Ventas también necesita gestionar clientes para poder venderles
+        $roleVentas->syncPermissions([
+            'manage clients', // <--- Asignado a Ventas
+            'create tickets', 
+            'print tickets'
+        ]);
+
+        // 6. ASIGNAR PERMISOS A CASETA
         $roleCaseta->syncPermissions(['validate exit']);
 
-        // 5. CREAR USUARIO ADMIN
+        // 7. CREAR USUARIOS
+        
+        // Admin
         $userAdmin = User::firstOrCreate(
             ['email' => 'admin@vales.com'],
             [
@@ -61,7 +74,7 @@ class DatabaseSeeder extends Seeder
         );
         $userAdmin->assignRole($roleAdmin);
 
-        // 6. CREAR USUARIO VENTAS
+        // Ventas
         $userVentas = User::firstOrCreate(
             ['email' => 'ventas@vales.com'],
             [
@@ -71,7 +84,7 @@ class DatabaseSeeder extends Seeder
         );
         $userVentas->assignRole($roleVentas);
 
-        // 7. CREAR USUARIO CASETA
+        // Caseta
         $userCaseta = User::firstOrCreate(
             ['email' => 'caseta@vales.com'],
             [
@@ -81,6 +94,6 @@ class DatabaseSeeder extends Seeder
         );
         $userCaseta->assignRole($roleCaseta);
 
-        $this->command->info('¡Listo! Usuarios creados: Admin, Ventas y Caseta.');
+        $this->command->info('¡Listo! Permiso manage clients creado y asignado.');
     }
 }
