@@ -18,7 +18,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Código / SKU</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre / Codigo</label>
                                 <input type="text" name="code" class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. MAT-001">
                             </div>
 

@@ -57,6 +57,14 @@
                     </a>
                     @endcan
 
+                    <a href="{{ route('units.index') }}" class="flex items-center px-6 py-3 {{ request()->routeIs('units.*') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h12a1 1 0 001-1v-3a1 1 0 00-1-1H9z"></path>
+                        </svg>
+                        Unidades
+                    </a>
+
                     <div class="border-t border-gray-100 my-2"></div>
 
                     <a href="#" class="flex items-center px-6 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900">

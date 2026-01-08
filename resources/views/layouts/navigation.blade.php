@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<!-- <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
@@ -36,6 +36,10 @@
                             {{ __('Materiales') }}
                         </x-nav-link>
                     @endcan
+
+                    <x-nav-link :href="route('units.index')" :active="request()->routeIs('units.*')">
+                        {{ __('Unidades') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -60,7 +64,6 @@
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
@@ -111,6 +114,10 @@
                     {{ __('Materiales') }}
                 </x-responsive-nav-link>
             @endcan
+
+            <x-responsive-nav-link :href="route('units.index')" :active="request()->routeIs('units.*')">
+                {{ __('Unidades') }}
+            </x-responsive-nav-link>
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
@@ -126,7 +133,6 @@
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
@@ -136,4 +142,4 @@
             </div>
         </div>
     </div>
-</nav>
+</nav> -->

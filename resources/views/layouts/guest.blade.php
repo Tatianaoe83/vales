@@ -20,14 +20,14 @@
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg border border-gray-100">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-xl border border-gray-200">
                 {{ $slot }}
             </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            // 1. Configuración de Toasts
+            // Configuración base del Toast (Notificación esquina superior)
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -40,7 +40,7 @@
                 }
             });
 
-          
+            // 1. Mensajes de Éxito o Status (Ej: "Link de recuperación enviado")
             @if (session('status') || session('success'))
                 Toast.fire({
                     icon: 'success',
@@ -48,6 +48,7 @@
                 });
             @endif
 
+            // 2. Manejo de Errores de Validación (Ej: "Contraseña incorrecta")
             @if ($errors->any())
                 let errorHtml = '<ul class="text-left text-sm list-disc pl-5">';
                 @foreach ($errors->all() as $error)
@@ -56,11 +57,11 @@
                 errorHtml += '</ul>';
 
                 Swal.fire({
-                    title: 'Hubo un problema',
+                    title: 'Atención',
                     html: errorHtml,
                     icon: 'error',
                     confirmButtonText: 'Reintentar',
-                    confirmButtonColor: '#EF4444',
+                    confirmButtonColor: '#EF4444', // Rojo Tailwind
                     customClass: {
                         popup: 'rounded-xl'
                     }

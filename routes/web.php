@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController; 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\UnitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,14 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('materials', App\Http\Controllers\MaterialController::class);
 
+    // --- MÓDULO UNIDADES ---
+    Route::post('/units', [UnitController::class, 'store'])->name('units.store');
+    Route::get('/units/gafete/{uuid}', [UnitController::class, 'descargarGafete'])->name('units.gafete');
+    Route::get('/check-access/{uuid}', [UnitController::class, 'validateAccess'])->name('units.validate_access');
+    Route::get('/units', [UnitController::class, 'index'])->name('units.index');
+    Route::get('/units/{id}/edit', [UnitController::class, 'edit'])->name('units.edit');
+    Route::put('/units/{id}', [UnitController::class, 'update'])->name('units.update');
+    Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
 });
 
 require __DIR__.'/auth.php';
