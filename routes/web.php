@@ -6,6 +6,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController; 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\SaleController; // <--- Faltaba importar este
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +22,9 @@ Route::get('/', function () {
 });
 
 // Dashboard
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     
@@ -43,11 +46,15 @@ Route::middleware('auth')->group(function () {
 
     // --- MÓDULO CLIENTES ---
     Route::middleware('permission:manage clients')->group(function () {
+        // API interna para el Wizard de Ventas (AJAX)
+        Route::get('/api/clients/{id}', [ClientController::class, 'getById']);
+        
         Route::delete('/clients/{client}/force', [ClientController::class, 'forceDelete'])->name('clients.forceDelete');
         Route::resource('clients', ClientController::class);
     }); 
 
-    Route::resource('materials', App\Http\Controllers\MaterialController::class);
+    // --- MÓDULO MATERIALES ---
+    Route::resource('materials', MaterialController::class);
 
     // --- MÓDULO UNIDADES ---
     Route::post('/units', [UnitController::class, 'store'])->name('units.store');
@@ -57,6 +64,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/units/{id}/edit', [UnitController::class, 'edit'])->name('units.edit');
     Route::put('/units/{id}', [UnitController::class, 'update'])->name('units.update');
     Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
+
+    // --- MÓDULO VENTAS (SALES) ---
+    // 1. Rutas principales (Crear, Guardar, Ver detalle)
+    Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
+    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+    Route::get('/sales/{id}', [SaleController::class, 'show'])->name('sales.show');
+    
+    // 2. Rutas de Impresión
+    Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
+    Route::get('/sales/{id}/pdf', [SaleController::class, 'pdf'])->name('sales.pdf');
+    Route::get('/sales/{id}/email', [SaleController::class, 'email'])->name('sales.email');
+
 });
 
 require __DIR__.'/auth.php';

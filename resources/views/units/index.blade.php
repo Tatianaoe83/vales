@@ -26,7 +26,6 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="text-xs font-bold tracking-wider text-gray-400 uppercase bg-gray-50 border-b border-gray-100">
-                                    <th class="px-6 py-5">Identificación / Chofer</th>
                                     <th class="px-6 py-5">Cliente (Dueño)</th>
                                     <th class="px-6 py-5">Tipo & Capacidad</th>
                                     <th class="px-6 py-5 text-center">Estado</th>
@@ -44,10 +43,7 @@
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-bold text-gray-900 font-mono tracking-wide">{{ $unit->placa }}</div>
-                                                <div class="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                                    {{ $unit->nombre_chofer }}
-                                                </div>
+
                                             </div>
                                         </div>
                                     </td>
@@ -177,10 +173,7 @@
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Placa</label>
                             <input type="text" name="placa" value="{{ old('placa') }}" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm uppercase font-mono placeholder-gray-300 focus:ring-2 focus:ring-blue-500 transition" placeholder="Ej: ABC-123" required>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Chofer</label>
-                            <input type="text" name="nombre_chofer" value="{{ old('nombre_chofer') }}" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm placeholder-gray-300 focus:ring-2 focus:ring-blue-500 transition" placeholder="Nombre completo" required>
-                        </div>
+
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
