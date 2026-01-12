@@ -40,10 +40,8 @@ class MaterialController extends Controller
             'stock' => 'integer|min:0',
         ]);
 
-        // 1. Crear el material
         $material = Material::create($request->all());
 
-        // 2. Registrar el precio inicial en el historial
         MaterialPriceHistory::create([
             'material_id' => $material->id,
             'price' => $material->price,
@@ -55,7 +53,6 @@ class MaterialController extends Controller
 
     public function edit(Material $material)
     {
-        // Traemos el historial para la vista de edición
         $history = $material->priceHistory;
         return view('materials.edit', compact('material', 'history'));
     }
@@ -70,8 +67,7 @@ class MaterialController extends Controller
             'stock' => 'integer|min:0',
         ]);
 
-        // DETECTAR CAMBIO DE PRECIO
-        // Si el precio nuevo es diferente al actual, guardamos historial
+    
         if ($request->price != $material->price) {
             MaterialPriceHistory::create([
                 'material_id' => $material->id,
@@ -87,7 +83,6 @@ class MaterialController extends Controller
 
     public function destroy(Material $material)
     {
-        // Borrado lógico (Desactivar en lugar de borrar)
         $material->update(['is_active' => false]);
         return redirect()->route('materials.index')->with('success', 'Material desactivado.');
     }

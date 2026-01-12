@@ -38,7 +38,7 @@
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg">
                                                 {{ substr($client->name, 0, 1) }}
-                                            </div>
+                                            </div>  
                                             <div class="ml-4">
                                                 <div class="text-sm font-bold text-gray-900">{{ $client->name }}</div>
                                                 <div class="text-xs text-gray-400">ID: {{ $client->id }}</div>

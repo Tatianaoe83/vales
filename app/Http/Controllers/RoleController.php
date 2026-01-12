@@ -8,21 +8,18 @@ use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
-    // 1. VER TABLA 
     public function index()
     {
         $roles = Role::with('permissions')->paginate(10);
         return view('roles.index', compact('roles'));
     }
 
-    // 2. MOSTRAR FORMULARIO
     public function create()
     {
         $permissions = Permission::all();
         return view('roles.create', compact('permissions'));
     }
 
-    // 3. GUARDAR
     public function store(Request $request)
     {
         $request->validate([
@@ -42,7 +39,6 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('success', 'Rol creado y permisos asignados exitosamente.');
     }
 
-    // 4. MOSTRAR FORMULARIO DE EDITAR
     public function edit($id)
     {
         $role = Role::findById($id);
@@ -51,7 +47,6 @@ class RoleController extends Controller
         return view('roles.edit', compact('role', 'permissions'));
     }
 
-    // 5. ACTUALIZAR ROL
     public function update(Request $request, $id)
     {
         $role = Role::findById($id);
@@ -72,7 +67,6 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('success', 'Rol y permisos actualizados correctamente.');
     }
 
-    // 6. ELIMINAR ROL
     public function destroy($id)
     {
         $role = Role::findById($id);

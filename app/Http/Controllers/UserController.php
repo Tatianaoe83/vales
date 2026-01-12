@@ -9,21 +9,18 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // 1. LISTAR USUARIOS
     public function index()
     {
         $users = User::with('roles')->paginate(10);
         return view('users.index', compact('users'));
     }
 
-    // 2. FORMULARIO CREAR
     public function create()
     {
         $roles = Role::all();
         return view('users.create', compact('roles'));
     }
 
-    // 3. GUARDAR USUARIO
     public function store(Request $request)
     {
         $request->validate([
@@ -45,7 +42,6 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
     }
 
-    // 4. FORMULARIO EDITAR
     public function edit($id)
     {
         $user = User::find($id);
@@ -53,7 +49,6 @@ class UserController extends Controller
         return view('users.edit', compact('user', 'roles'));
     }
 
-    // 5. ACTUALIZAR USUARIO
     public function update(Request $request, $id)
     {
         $user = User::find($id);
@@ -78,12 +73,10 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Usuario actualizado.');
     }
 
-    // 6. ACTIVAR / DESACTIVAR
     public function toggleStatus($id)
     {
         $user = User::find($id);
         
-        // Invertimos el valor (Si es true pasa a false, y viceversa)
         $user->is_active = !$user->is_active;
         $user->save();
 

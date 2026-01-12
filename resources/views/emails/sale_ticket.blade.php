@@ -7,7 +7,7 @@
 
     <h2>Hola, {{ $sale->client->name }}</h2>
 
-    <p>Adjunto encontrarás la remisión y los vales correspondientes a tu compra reciente.</p>
+    <p>Adjunto la remisión y los vales correspondientes a tu compra reciente.</p>
 
     <ul>
         <li><strong>Folio:</strong> {{ $sale->folio }}</li>
@@ -18,7 +18,8 @@
     <p>Gracias por tu preferencia.</p>
     
     <p>Atentamente,<br>
-    <strong>Constructora Proser</strong></p>
+    <strong>Materiasles Agregados
+    </strong></p>
 
 </body>
 </html>

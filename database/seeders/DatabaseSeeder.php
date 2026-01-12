@@ -10,71 +10,84 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
-        // 1. Limpiar caché de permisos
+        // 1. Limpiar caché de permisos (Crucial para evitar errores al modificar permisos)
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 2. CREAR TODOS LOS PERMISOS (Aquí faltaba 'manage clients')
+        // 2. CREAR TODOS LOS PERMISOS
+        // Definimos la lista maestra de permisos del sistema
         $permissions = [
-            // --- GESTIÓN DEL SISTEMA ---
-            'manage users',       
-            'manage roles',
-            'manage clients', // <--- ¡AQUÍ ESTABA EL FALTANTE! 🔑
-            'view reports',       
+            // --- GESTIÓN DEL SISTEMA (Admin) ---
+            'manage users',       // Crear/Editar usuarios
+            'manage roles',       // Gestionar roles y permisos
+            'view reports',       // Ver reportes globales
+            
+            // --- GESTIÓN DE NEGOCIO (Admin + Ventas) ---
+            'manage clients',     // <--- EL PERMISO QUE FALTABA (Crear/Ver Clientes)
+            'manage materials',   // Crear/Editar materiales
+            'manage units',       // Crear/Editar camiones
 
             // --- OPERATIVOS (Ventas) ---
-            'create tickets',     
-            'edit tickets',       
-            'print tickets',      
+            'create tickets',     // Crear nuevas ventas/vales
+            'edit tickets',       // Editar ventas existentes (si aplica)
+            'print tickets',      // Imprimir o enviar PDF
+            'view tickets',       // Ver historial de ventas
             
-            // --- OPERATIVOS (Caseta) ---
-            'validate exit',      
-            'report issue',       
+            // --- OPERATIVOS (Caseta/Vigilancia) ---
+            'validate exit',      // Escanear QR y dar salida
+            'report issue',       // Reportar incidencias en puerta
         ];
 
-        // Este bucle crea los permisos en la base de datos
+        // Creamos los permisos en la base de datos si no existen
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
         // 3. CREAR ROLES
-        $roleAdmin   = Role::firstOrCreate(['name' => 'administrador']);
-        $roleVentas  = Role::firstOrCreate(['name' => 'ventas']);
-        $roleCaseta  = Role::firstOrCreate(['name' => 'caseta']);
+        $roleAdmin  = Role::firstOrCreate(['name' => 'administrador']);
+        $roleVentas = Role::firstOrCreate(['name' => 'ventas']);
+        $roleCaseta = Role::firstOrCreate(['name' => 'caseta']);
 
-        // 4. ASIGNAR PERMISOS AL ADMIN
-        $roleAdmin->syncPermissions([
-            'manage users',
-            'manage roles', 
-            'manage clients', // <--- Asignado al Admin
-            'view reports'
-        ]);
+        // 4. ASIGNAR PERMISOS A LOS ROLES
 
-        // 5. ASIGNAR PERMISOS A VENTAS
-        // Ventas también necesita gestionar clientes para poder venderles
+        // A) ADMINISTRADOR: Tiene acceso a todo
+        $roleAdmin->syncPermissions(Permission::all());
+
+        // B) VENTAS: Puede gestionar clientes, materiales y hacer ventas
         $roleVentas->syncPermissions([
-            'manage clients', // <--- Asignado a Ventas
-            'create tickets', 
-            'print tickets'
+            'manage clients',    // Necesario para seleccionar cliente en el wizard
+            'manage materials',  // Para ver precios y stock
+            'manage units',      // Para logística
+            'create tickets',
+            'print tickets',
+            'view tickets',
+            'view reports'       // Opcional: si quieres que vean sus propios reportes
         ]);
 
-        // 6. ASIGNAR PERMISOS A CASETA
-        $roleCaseta->syncPermissions(['validate exit']);
+        // C) CASETA: Solo valida salidas
+        $roleCaseta->syncPermissions([
+            'validate exit',
+            'report issue',
+            'view tickets'       // Para ver detalles básicos al escanear
+        ]);
 
-        // 7. CREAR USUARIOS
-        
-        // Admin
+        // 5. CREAR USUARIOS POR DEFECTO
+
+        // Usuario Admin
         $userAdmin = User::firstOrCreate(
             ['email' => 'admin@vales.com'],
             [
                 'name' => 'Jefe Admin', 
-                'password' => Hash::make('password')
+                'password' => Hash::make('password') // Contraseña: password
             ]
         );
         $userAdmin->assignRole($roleAdmin);
 
-        // Ventas
+        // Usuario Ventas
         $userVentas = User::firstOrCreate(
             ['email' => 'ventas@vales.com'],
             [
@@ -84,7 +97,7 @@ class DatabaseSeeder extends Seeder
         );
         $userVentas->assignRole($roleVentas);
 
-        // Caseta
+        // Usuario Caseta
         $userCaseta = User::firstOrCreate(
             ['email' => 'caseta@vales.com'],
             [
@@ -94,6 +107,9 @@ class DatabaseSeeder extends Seeder
         );
         $userCaseta->assignRole($roleCaseta);
 
-        $this->command->info('¡Listo! Permiso manage clients creado y asignado.');
+        // Mensaje de éxito en consola
+        $this->command->info('Seeders ejecutados correctamente.');
+        $this->command->info('Usuario Admin: admin@vales.com / password');
+        $this->command->info('Usuario Ventas: ventas@vales.com / password');
     }
 }

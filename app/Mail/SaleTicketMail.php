@@ -24,6 +24,7 @@ class SaleTicketMail extends Mailable
         $pdf = Pdf::loadView('sales.pdf', ['sale' => $this->sale]);
 
         return $this->subject('Remisión de Venta #' . $this->sale->folio)
+                    ->replyTo('becario.prog@proser.com.mx', 'Atención Proser') 
                     ->view('emails.sale_ticket') 
                     ->attachData($pdf->output(), "Remision_{$this->sale->folio}.pdf", [
                         'mime' => 'application/pdf',

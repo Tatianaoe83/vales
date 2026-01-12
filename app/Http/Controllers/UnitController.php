@@ -10,7 +10,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class UnitController extends Controller
 {
-    // 1. Guardar la unidad 
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -26,7 +25,6 @@ class UnitController extends Controller
         return redirect()->back()->with('success', 'Unidad registrada correctamente.');
     }
 
-    // 2. Generar y Descargar PDF con QR
     public function descargarGafete($uuid)
     {
         $unit = Unit::where('uuid', $uuid)->with('client')->firstOrFail();
@@ -40,7 +38,6 @@ class UnitController extends Controller
         return $pdf->setPaper('a6', 'landscape')->download("Gafete_{$unit->placa}.pdf");
     }
 
-    // 3. Validar acceso
     public function validateAccess($uuid)
     {
         $unit = Unit::where('uuid', $uuid)->firstOrFail();
@@ -52,7 +49,6 @@ class UnitController extends Controller
             'capacidad' => $unit->capacidad_maxima . ' ' . $unit->unidad_medida
         ]);
     }
-    // 4. Edición
     public function edit($id)
     {
         $unit = Unit::findOrFail($id);
@@ -60,7 +56,6 @@ class UnitController extends Controller
         return view('units.edit', compact('unit', 'clients'));
     }
 
-    // 5. (Update)
     public function update(Request $request, $id)
     {
         $unit = Unit::findOrFail($id);
@@ -79,7 +74,6 @@ class UnitController extends Controller
         return redirect()->route('units.index')->with('success', 'Unidad actualizada correctamente.');
     }
 
-    // 6. Eliminar
     public function destroy($id)
     {
         $unit = Unit::findOrFail($id);

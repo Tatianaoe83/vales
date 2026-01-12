@@ -17,7 +17,24 @@ use App\Mail\SaleTicketMail;
 
 class SaleController extends Controller
 {
-    // Muestra el formulario (Wizard)
+    public function index(Request $request)
+    {
+        $query = Sale::with(['client', 'vales.unit', 'vales.material'])
+            ->latest();
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('folio', 'like', "%{$search}%")
+                  ->orWhereHas('client', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+        }
+
+        $sales = $query->paginate(10);
+
+        return view('sales.index', compact('sales'));
+    }
+
     public function create()
     {
         $clients = Client::where('is_active', true)->get();
@@ -27,7 +44,6 @@ class SaleController extends Controller
         return view('sales.create', compact('clients', 'materials', 'units'));
     }
 
-    // Procesa la venta y genera los vales basados en la logística
     public function store(Request $request)
     {
         $request->validate([
@@ -42,6 +58,16 @@ class SaleController extends Controller
         try {
             $saleId = DB::transaction(function () use ($request) {
                 
+                $material = Material::lockForUpdate()->find($request->material_id);
+
+                if (!$material) {
+                    throw new \Exception("El material seleccionado no existe.");
+                }
+
+                if ($material->stock < $request->cantidad_total) {
+                    throw new \Exception("Stock insuficiente. Disponible: {$material->stock} {$material->unit}, Solicitado: {$request->cantidad_total}");
+                }
+
                 $vencimiento = Carbon::now();
                 if ($request->tipo_venta === 'Credito') {
                     $vencimiento = Carbon::now()->addDays(15);
@@ -65,13 +91,8 @@ class SaleController extends Controller
                     'notas' => $request->notas
                 ]);
 
-                
-                $material = Material::find($request->material_id);
-                if ($material) {
-                    $material->decrement('stock', $request->cantidad_total);
-                }
+                $material->decrement('stock', $request->cantidad_total);
 
-               
                 $trips = json_decode($request->trips_configuration, true);
                 
                 if (!is_array($trips) || count($trips) === 0) {
@@ -79,11 +100,9 @@ class SaleController extends Controller
                 }
 
                 foreach ($trips as $index => $trip) {
-                    
                     $letra = chr(64 + ($index + 1)); 
                     $folioVale = $sale->folio . '-' . $letra;
 
-                    // Crear el vale específico
                     $vale = Vale::create([
                         'sale_id' => $sale->id,
                         'folio_vale' => $folioVale,
@@ -93,7 +112,6 @@ class SaleController extends Controller
                         'estatus' => 'Vigente'
                     ]);
 
-                    // 7. Registrar Historial
                     ValeHistory::create([
                         'vale_id' => $vale->id,
                         'user_id' => auth()->id(),

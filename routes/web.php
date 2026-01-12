@@ -66,15 +66,25 @@ Route::middleware('auth')->group(function () {
     Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
 
     // --- MÓDULO VENTAS (SALES) ---
-    // 1. Rutas principales (Crear, Guardar, Ver detalle)
     Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
     Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
     Route::get('/sales/{id}', [SaleController::class, 'show'])->name('sales.show');
+    Route::get('/sales', [App\Http\Controllers\SaleController::class, 'index'])->name('sales.index');   
+    Route::get('/vales/{id}/history', [App\Http\Controllers\ValeController::class, 'history'])->name('vales.history');
+    Route::post('/vales/{id}/restore', [App\Http\Controllers\ValeController::class, 'restore'])->name('vales.restore');
+
     
-    // 2. Rutas de Impresión
     Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
     Route::get('/sales/{id}/pdf', [SaleController::class, 'pdf'])->name('sales.pdf');
     Route::get('/sales/{id}/email', [SaleController::class, 'email'])->name('sales.email');
+    Route::post('/vales/{id}/status', [App\Http\Controllers\ValeController::class, 'updateStatus'])->name('vales.status');  
+
+    // --- RUTAS DE OPERACIONES (CASETA) ---
+    Route::get('/scanner', [App\Http\Controllers\OperationsController::class, 'index'])->name('operations.scanner');
+    Route::post('/scanner/lookup', [App\Http\Controllers\OperationsController::class, 'lookup'])->name('operations.lookup');
+    Route::post('/scanner/register', [App\Http\Controllers\OperationsController::class, 'register'])->name('operations.register');
+    Route::get('/vales/export/{format}', [App\Http\Controllers\ValeController::class, 'export'])->name('vales.export');
+
 
 });
 
