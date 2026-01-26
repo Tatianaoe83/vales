@@ -9,7 +9,13 @@ class Vale extends Model
 {
     protected $fillable = [
         'sale_id', 'folio_vale', 'uuid', 'material_id', 
-        'cantidad', 'unit_id', 'estatus'
+        'cantidad', 'unit_id', 'estatus','fecha_entrada',
+        'fecha_salida',
+    ];
+
+    protected $casts = [
+        'fecha_entrada' => 'datetime',
+        'fecha_salida' => 'datetime',
     ];
 
     

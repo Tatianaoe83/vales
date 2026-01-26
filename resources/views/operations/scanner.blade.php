@@ -2,169 +2,261 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"> <title>Scanner Caseta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>Scanner Logística</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        #reader { width: 100%; height: 100%; object-fit: cover; }
+        #reader video { object-fit: cover; border-radius: 1rem; }
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white h-screen overflow-hidden" x-data="scannerApp()" x-init="initFocus()">
+<body class="bg-gray-50 h-screen flex flex-col font-sans" x-data="cameraApp()" x-init="startCamera()">
 
-    <div class="h-16 bg-gray-800 flex justify-between items-center px-4 shadow-lg">
-        <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <span class="font-bold tracking-wider">CASETA ONLINE</span>
+    <div class="bg-white h-16 flex justify-between items-center px-4 shadow-sm z-20 sticky top-0 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow-md">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-gray-800 leading-tight">Caseta Visor</h1>
+                <div class="flex items-center gap-1">
+                    <div class="w-2 h-2 rounded-full" :class="scanning ? 'bg-green-500 animate-pulse' : 'bg-red-500'"></div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide" x-text="scanning ? 'CAMARA ACTIVA' : 'EN PAUSA'"></span>
+                </div>
+            </div>
         </div>
+        
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="text-gray-400 hover:text-white text-sm uppercase font-bold">
-                Salir <i class="fas fa-sign-out-alt ml-1"></i>
+            <button type="submit" class="text-gray-400 hover:text-red-500 transition p-2">
+                <i class="fas fa-power-off text-lg"></i>
             </button>
         </form>
     </div>
 
-    <div class="h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 relative">
+    <div class="flex-grow flex flex-col items-center justify-start pt-4 px-4 gap-4 overflow-y-auto pb-20">
         
-        <div x-show="!vale" class="text-center w-full max-w-md animate-fade-in">
-            <div class="mb-8 relative inline-block">
-                <i class="fas fa-qrcode text-[120px] text-blue-500 opacity-80 animate-pulse"></i>
-                <div class="absolute -bottom-4 left-0 w-full text-center">
-                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full uppercase font-bold">Modo Lectura</span>
+        <div class="relative w-full max-w-sm aspect-[16/9] bg-black rounded-2xl shadow-lg overflow-hidden border border-gray-300 shrink-0">
+            <div id="reader" class="w-full h-full opacity-90"></div>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-40 h-40 border-2 border-white/40 rounded-lg relative">
+                    <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-green-400"></div>
+                    <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-green-400"></div>
+                    <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-green-400"></div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-green-400"></div>
                 </div>
             </div>
-            <h1 class="text-3xl font-black mb-2">ESCANEAR CÓDIGO</h1>
-            <p class="text-gray-400 text-lg">Apunta la pistola al Vale</p>
-            
-            <input type="text" x-model="inputVale" @keydown.enter="lookupVale()" 
-                   id="inputVale" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" autocomplete="off" autofocus>
+            <div class="absolute bottom-2 left-0 w-full text-center pointer-events-none">
+                <span class="bg-black/70 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur" x-text="mensajeGuia"></span>
+            </div>
         </div>
 
-        <div x-show="vale" style="display: none;" class="w-full max-w-lg bg-white text-gray-800 rounded-3xl overflow-hidden shadow-2xl relative animate-slide-up">
+        <div class="w-full max-w-sm flex gap-2" x-show="!vale">
+            <div class="relative flex-grow">
+                <i class="fas fa-keyboard absolute left-3 top-3 text-gray-400"></i>
+                <input type="text" x-model="inputManual" @keydown.enter="simularEscaneo()"
+                       class="w-full bg-white border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 outline-none uppercase" 
+                       placeholder="Escribir código manual...">
+            </div>
+            <button @click="simularEscaneo()" class="bg-gray-800 text-white px-4 rounded-lg shadow-sm hover:bg-gray-700">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+
+        <div x-show="vale" x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0 translate-y-10" 
+             x-transition:enter-end="opacity-100 translate-y-0"
+             style="display: none;" 
+             class="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-4 relative">
             
-            <button @click="reset()" class="absolute top-4 right-4 bg-gray-200 text-gray-600 w-10 h-10 rounded-full flex items-center justify-center font-bold z-10 hover:bg-red-100 hover:text-red-500">
+            <button @click="resetTodo()" class="absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-400 rounded-full hover:bg-red-100 hover:text-red-500 transition shadow-sm">
                 <i class="fas fa-times"></i>
             </button>
 
-            <div class="p-6 text-center" :class="context === 'entrada' ? 'bg-yellow-400' : 'bg-blue-600 text-white'">
-                <p class="text-xs font-bold uppercase opacity-80 mb-1" x-text="context === 'entrada' ? 'ENTRADA DETECTADA' : 'SALIDA DETECTADA'"></p>
-                <h2 class="text-4xl font-black tracking-tighter" x-text="vale?.folio_vale"></h2>
-                <p class="text-sm font-mono mt-1 opacity-90" x-text="vale?.unit?.placa ?? 'SIN PLACAS'"></p>
+            <div class="bg-gray-800 text-white p-5 text-center relative overflow-hidden">
+                <i class="fas fa-truck absolute -left-4 -bottom-4 text-6xl text-gray-700 opacity-20 transform -rotate-12"></i>
+                
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Unidad Autorizada</p>
+                <h2 class="text-4xl font-black tracking-tight uppercase" 
+                    x-text="vale?.unit?.placa ?? 'EXTERNA'">
+                </h2>
+                <div class="mt-2 inline-flex items-center gap-2 bg-gray-700 px-3 py-1 rounded-full text-xs">
+                    <i class="fas fa-ticket-alt text-yellow-400"></i>
+                    <span class="font-mono text-gray-300" x-text="vale?.folio_vale"></span>
+                </div>
             </div>
 
-            <div class="p-6 space-y-4">
-                <div class="flex items-center gap-4">
-                    <div class="bg-blue-50 p-3 rounded-xl text-blue-600"><i class="fas fa-cubes text-2xl"></i></div>
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase font-bold">Material</p>
-                        <p class="text-xl font-bold leading-none" x-text="vale?.material?.name"></p>
-                        <p class="text-sm text-blue-600 font-bold"><span x-text="vale?.cantidad"></span> <span x-text="vale?.material?.unit"></span></p>
+            <div class="p-5 grid grid-cols-2 gap-4 border-b border-gray-100 bg-white">
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Carga / Material</p>
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-cubes text-blue-500 mt-1"></i>
+                        <div>
+                            <p class="font-bold text-gray-800 leading-tight" x-text="vale?.material?.name"></p>
+                            <p class="text-xs text-gray-500"><span x-text="vale?.cantidad"></span> <span x-text="vale?.material?.unit"></span></p>
+                        </div>
                     </div>
                 </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Cliente Destino</p>
+                    <p class="font-bold text-gray-800 text-sm truncate leading-tight" x-text="vale?.sale?.client?.name"></p>
+                </div>
+            </div>
 
-                <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+            <div class="p-4 bg-gray-50">
+                <div class="rounded-xl p-4 text-center border-2 shadow-sm transition-colors duration-300" 
+                     :class="context === 'entrada' ? 'bg-yellow-50 border-yellow-400 text-yellow-800' : 'bg-green-50 border-green-500 text-green-800'">
                     
-                    <div x-show="context === 'entrada'">
-                        <p class="text-yellow-600 font-bold animate-pulse mb-2">ESPERANDO ESCANEO DE UNIDAD...</p>
-                        <input type="text" x-model="inputUnidad" @keydown.enter="confirmarEntrada()" 
-                               id="inputUnidad"
-                               class="w-full text-center text-2xl font-black uppercase border-2 border-yellow-400 rounded-xl p-3 focus:outline-none focus:ring-4 focus:ring-yellow-200"
-                               placeholder="QR CAMIÓN" autocomplete="off">
+                    <p class="text-xs font-bold uppercase mb-1 opacity-80" x-text="context === 'entrada' ? 'PASO 2: VALIDACIÓN' : 'PASO FINAL: SALIDA'"></p>
+                    
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fas text-2xl" :class="context === 'entrada' ? 'fa-camera' : 'fa-check-circle'"></i>
+                        <span class="font-black text-xl uppercase" x-text="context === 'entrada' ? 'ESCANEAR CAMIÓN' : 'CONFIRMAR SALIDA'"></span>
                     </div>
 
-                    <div x-show="context === 'salida'">
-                        <p class="text-blue-600 font-bold mb-4">ESCANEE COMANDO DE MESA</p>
-                        <div class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none">
-                            <div class="bg-gray-100 p-2 rounded border border-gray-300">
-                                <span class="font-bold text-xs">CMD_SURTIDO</span>
-                            </div>
-                            <div class="bg-gray-100 p-2 rounded border border-gray-300">
-                                <span class="font-bold text-xs">CMD_VACIO</span>
-                            </div>
-                        </div>
-                        <input type="text" x-model="inputCommand" @keydown.enter="procesarComando()" 
-                               id="inputCommand"
-                               class="w-full mt-4 text-center text-xl uppercase border-2 border-blue-200 rounded-xl p-2"
-                               placeholder="Esperando..." autocomplete="off">
+                    <div x-show="context === 'salida'" class="mt-3 grid grid-cols-2 gap-2">
+                        <button @click="inputManual='CMD_SURTIDO'; simularEscaneo()" class="bg-blue-600 text-white text-xs font-bold py-2 rounded-lg shadow hover:bg-blue-700">
+                            SURTIDO
+                        </button>
+                        <button @click="inputManual='CMD_VACIO'; simularEscaneo()" class="bg-white text-gray-600 text-xs font-bold py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
+                            VACÍO
+                        </button>
                     </div>
 
+                    <p x-show="context === 'entrada'" class="text-xs mt-2 font-medium">
+                        Por favor, apunte al código QR pegado en la unidad.
+                    </p>
                 </div>
             </div>
         </div>
-
-    </div>
+        </div>
 
     <script>
-        function scannerApp() {
+        function cameraApp() {
             return {
-                inputVale: '', inputUnidad: '', inputCommand: '',
-                vale: null, context: '',
-                
-                initFocus() {
-                    setInterval(() => {
-                        if(!this.vale) document.getElementById('inputVale')?.focus();
-                        else if(this.context === 'entrada') document.getElementById('inputUnidad')?.focus();
-                        else if(this.context === 'salida') document.getElementById('inputCommand')?.focus();
-                    }, 500); // Re-enfoca cada medio segundo para asegurar "Manos Libres"
+                html5QrcodeScanner: null,
+                scanning: false,
+                vale: null,
+                context: 'inicio', 
+                mensajeGuia: 'Escanea el Vale',
+                inputManual: '', 
+
+                startCamera() {
+                    // Intentamos iniciar cámara
+                    this.html5QrcodeScanner = new Html5Qrcode("reader");
+                    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                    
+                    this.html5QrcodeScanner.start({ facingMode: "environment" }, config, 
+                        (decodedText) => { this.onScanSuccess(decodedText); },
+                        (errorMessage) => { }
+                    ).then(() => {
+                        this.scanning = true;
+                    }).catch(err => {
+                        console.log('Cámara no disponible, usar modo manual');
+                        this.mensajeGuia = 'Usa código manual';
+                    });
                 },
 
-                async lookupVale() {
-                    if (!this.inputVale) return;
+                simularEscaneo() {
+                    if(!this.inputManual) return;
+                    this.onScanSuccess(this.inputManual);
+                    this.inputManual = ''; 
+                },
+
+                async onScanSuccess(codigo) {
+                    this.playSound('beep');
+
+                    if (!this.vale) {
+                        await this.lookupVale(codigo);
+                    } else {
+                        if (this.context === 'entrada') await this.confirmarEntrada(codigo);
+                        else if (this.context === 'salida') await this.procesarComando(codigo);
+                    }
+                },
+
+                async lookupVale(codigo) {
                     try {
-                        let res = await fetch("{{ route('operations.lookup') }}", {
+                        let res = await fetch("/operations/lookup", {
                             method: "POST",
                             headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
-                            body: JSON.stringify({ code: this.inputVale })
+                            body: JSON.stringify({ code: codigo })
                         });
                         let data = await res.json();
+
                         if (data.status === 'success') {
                             this.vale = data.data;
                             this.context = data.context;
-                            this.playSound('beep');
-                            this.inputVale = '';
+                            if(this.context === 'entrada') this.mensajeGuia = 'Escanea QR UNIDAD';
+                            else if(this.context === 'salida') this.mensajeGuia = 'Confirma Salida';
                         } else {
-                            this.alertError(data.message);
-                            this.inputVale = '';
+                            await this.alertError(data.message);
                         }
-                    } catch(e) { this.alertError('Error de red'); }
+                    } catch(e) { 
+                        await this.alertError('Error de conexión'); 
+                    }
                 },
 
-                async confirmarEntrada() {
-                    if (!this.inputUnidad) return;
-                    this.enviar('confirmar_entrada', this.inputUnidad);
+                async confirmarEntrada(qrUnidad) { await this.enviarServidor('confirmar_entrada', qrUnidad); },
+
+                async procesarComando(codigo) {
+                    let cmd = codigo.toUpperCase();
+                    if(cmd.includes('SURTIDO')) await this.enviarServidor('salida_surtido');
+                    else if(cmd.includes('VACIO')) await this.enviarServidor('salida_vacio');
+                    else {
+                        await this.alertError('Código inválido. Escanee comando.');
+                    }
                 },
 
-                async procesarComando() {
-                    let cmd = this.inputCommand.toUpperCase();
-                    if(cmd === 'CMD_SURTIDO') this.enviar('salida_surtido');
-                    else if(cmd === 'CMD_VACIO') this.enviar('salida_vacio');
-                    else { this.inputCommand = ''; this.playSound('error'); }
-                },
-
-                async enviar(accion, qr = null) {
+                async enviarServidor(accion, unitCode = null) {
                     try {
-                        let res = await fetch("{{ route('operations.register') }}", {
+                        let res = await fetch("/operations/register", {
                             method: "POST",
                             headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
-                            body: JSON.stringify({ vale_id: this.vale.id, accion: accion, unit_code: qr })
+                            body: JSON.stringify({ vale_id: this.vale.id, accion: accion, unit_code: unitCode })
                         });
                         let data = await res.json();
+
                         if (data.status === 'success') {
                             this.playSound('success');
-                            Swal.fire({ icon: 'success', title: data.message, timer: 1500, showConfirmButton: false });
-                            this.reset();
+                            await Swal.fire({ 
+                                icon: 'success', 
+                                title: '¡Aprobado!', 
+                                text: data.message, 
+                                timer: 2000, 
+                                showConfirmButton: false,
+                                background: '#f0fdf4',
+                                iconColor: '#16a34a'
+                            });
+                            this.resetTodo();
                         } else {
-                            this.playSound('error');
-                            Swal.fire({ icon: 'error', text: data.message });
-                            if(accion === 'confirmar_entrada') this.inputUnidad = '';
-                            else this.inputCommand = '';
+                            await this.alertError(data.message);
                         }
-                    } catch(e) { this.alertError('Error grave'); }
+                    } catch(e) {
+                        await this.alertError('Error del servidor');
+                    }
                 },
 
-                reset() { this.vale = null; this.inputVale = ''; this.inputUnidad = ''; this.inputCommand = ''; },
-                alertError(msg) { this.playSound('error'); Swal.fire({ icon: 'error', title: 'Oops...', text: msg, timer: 2000, showConfirmButton: false }); },
-                playSound(type) { 
+                resetTodo() {
+                    this.vale = null;
+                    this.context = 'inicio';
+                    this.mensajeGuia = 'Escanea el Vale';
+                    this.inputManual = '';
+                },
+
+                async alertError(msg) {
+                    this.playSound('error');
+                    await Swal.fire({ icon: 'error', title: 'Alto', text: msg, confirmButtonColor: '#ef4444' });
+                },
+
+                playSound(type) {
                     let a = new Audio();
                     if(type=='beep') a.src='https://www.soundjay.com/button/beep-07.mp3';
                     if(type=='success') a.src='https://www.soundjay.com/misc/sounds/magic-chime-01.mp3';
@@ -174,11 +266,5 @@
             }
         }
     </script>
-    <style>
-        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
-        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
 </body>
 </html>

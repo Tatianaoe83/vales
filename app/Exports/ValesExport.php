@@ -34,6 +34,9 @@ class ValesExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             'Unidad',
             'Placas',
             'Estatus',
+            'Hora Entrada',    // NUEVO
+            'Hora Salida',     // NUEVO
+            'Tiempo Estancia', // NUEVO (Calculado)
             'UUID (QR)',
         ];
     }
@@ -43,10 +46,18 @@ class ValesExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
     */
     public function map($vale): array
     {
+        $tiempoEstancia = '---';
+        
+        if ($vale->fecha_entrada && $vale->fecha_salida) {
+            $tiempoEstancia = $vale->fecha_entrada->diff($vale->fecha_salida)->format('%H hrs %I min');
+        } elseif ($vale->fecha_entrada && !$vale->fecha_salida) {
+            $tiempoEstancia = 'En proceso...';
+        }
+
         return [
             $vale->id,
             $vale->folio_vale,
-            $vale->sale->folio, // Accedemos al padre (Venta)
+            $vale->sale->folio, 
             $vale->created_at->format('d/m/Y H:i'),
             $vale->sale->client->name,
             $vale->material->name,
@@ -54,6 +65,12 @@ class ValesExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             $vale->unit ? $vale->unit->tipo_vehiculo : 'Externa',
             $vale->unit ? $vale->unit->placa : 'N/A',
             $vale->estatus,
+            
+            // COLUMNAS NUEVAS DE TIEMPO
+            $vale->fecha_entrada ? $vale->fecha_entrada->format('d/m/Y H:i') : '--',
+            $vale->fecha_salida ? $vale->fecha_salida->format('d/m/Y H:i') : '--',
+            $tiempoEstancia,
+
             $vale->uuid,
         ];
     }

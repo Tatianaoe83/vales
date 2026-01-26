@@ -85,6 +85,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/scanner/register', [App\Http\Controllers\OperationsController::class, 'register'])->name('operations.register');
     Route::get('/vales/export/{format}', [App\Http\Controllers\ValeController::class, 'export'])->name('vales.export');
 
+    // Reportes
+    Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/excel', [App\Http\Controllers\ReportController::class, 'exportExcel'])->name('reports.excel');
+    Route::get('/reports/export/pdf', [App\Http\Controllers\ReportController::class, 'exportPdf'])->name('reports.pdf');
 
 });
 
