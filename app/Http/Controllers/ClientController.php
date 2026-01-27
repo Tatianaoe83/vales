@@ -21,6 +21,7 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
+        // Convertir RFC a mayúsculas antes de validar
         if($request->has('rfc')){
             $request->merge(['rfc' => strtoupper($request->rfc)]);
         }
@@ -28,22 +29,29 @@ class ClientController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'rfc' => [
-                'nullable', 'string', 'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/',
+                'required', 'string', 'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/',
                 Rule::unique('clients')->where(fn ($query) => $query->where('is_active', true))
             ],
             'email' => [
-                'nullable', 'email',
+                'required', 'email',
                 Rule::unique('clients')->where(fn ($query) => $query->where('is_active', true))
             ],
             'phone' => [
-                'nullable', 'string', 'max:15',
+                'required', 'string', 'max:20',
                 Rule::unique('clients')->where(fn ($query) => $query->where('is_active', true))
             ],
+            'address' => 'required|string',
         ], [
+            // Mensajes personalizados
+            'name.required' => 'El nombre es obligatorio.',
+            'rfc.required' => 'El RFC es obligatorio.',
             'rfc.unique' => 'Este RFC ya está en uso por un cliente activo.',
             'rfc.regex' => 'Formato de RFC inválido.',
+            'email.required' => 'El correo es obligatorio.',
             'email.unique' => 'Este correo ya está en uso por un cliente activo.',
+            'phone.required' => 'El teléfono es obligatorio.',
             'phone.unique' => 'Este teléfono ya está en uso por un cliente activo.',
+            'address.required' => 'La dirección es obligatoria.',
         ]);
 
         Client::create($request->all());
@@ -65,22 +73,28 @@ class ClientController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'rfc' => [
-                'nullable', 'string', 'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/',
+                'required', 'string', 'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/',
                 Rule::unique('clients')->ignore($client->id)->where(fn ($query) => $query->where('is_active', true))
             ],
             'email' => [
-                'nullable', 'email',
+                'required', 'email',
                 Rule::unique('clients')->ignore($client->id)->where(fn ($query) => $query->where('is_active', true))
             ],
             'phone' => [
-                'nullable', 'string', 'max:15',
+                'required', 'string', 'max:20',
                 Rule::unique('clients')->ignore($client->id)->where(fn ($query) => $query->where('is_active', true))
             ],
+            'address' => 'required|string', 
         ], [
+            'name.required' => 'El nombre es obligatorio.',
+            'rfc.required' => 'El RFC es obligatorio.',
             'rfc.unique' => 'Este RFC ya está en uso por otro cliente activo.',
             'rfc.regex' => 'Formato de RFC inválido.',
+            'email.required' => 'El correo es obligatorio.',
             'email.unique' => 'Este correo ya está en uso por otro cliente activo.',
+            'phone.required' => 'El teléfono es obligatorio.',
             'phone.unique' => 'Este teléfono ya está en uso por otro cliente activo.',
+            'address.required' => 'La dirección es obligatoria.',
         ]);
 
         $client->update($request->all());

@@ -17,4 +17,9 @@ class Material extends Model
     {
         return $this->hasMany(MaterialPriceHistory::class)->orderBy('changed_at', 'desc');
     }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class)->latest();
+    }
 }

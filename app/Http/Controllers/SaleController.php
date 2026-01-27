@@ -8,8 +8,10 @@ use App\Models\Client;
 use App\Models\Unit;
 use App\Models\Material;
 use App\Models\ValeHistory;
+use App\Models\StockMovement; // <--- NUEVO: Para registrar movimientos de inventario
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // <--- NUEVO: Para obtener el usuario actual
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
@@ -58,6 +60,7 @@ class SaleController extends Controller
         try {
             $saleId = DB::transaction(function () use ($request) {
                 
+                // 1. Bloquear y Verificar Material
                 $material = Material::lockForUpdate()->find($request->material_id);
 
                 if (!$material) {
@@ -68,6 +71,7 @@ class SaleController extends Controller
                     throw new \Exception("Stock insuficiente. Disponible: {$material->stock} {$material->unit}, Solicitado: {$request->cantidad_total}");
                 }
 
+                // 2. Calcular Fechas y Totales
                 $vencimiento = Carbon::now();
                 if ($request->tipo_venta === 'Credito') {
                     $vencimiento = Carbon::now()->addDays(15);
@@ -79,6 +83,7 @@ class SaleController extends Controller
                 $iva = $subtotalFinal * 0.16;
                 $total = $subtotalFinal + $iva;
 
+                // 3. Crear la Venta
                 $sale = Sale::create([
                     'client_id' => $request->client_id,
                     'user_id' => auth()->id(),
@@ -91,8 +96,20 @@ class SaleController extends Controller
                     'notas' => $request->notas
                 ]);
 
+                // 4. Descontar Stock y Registrar Historial
                 $material->decrement('stock', $request->cantidad_total);
 
+                // --- AQUÍ REGISTRAMOS EL MOVIMIENTO EN EL HISTORIAL ---
+                StockMovement::create([
+                    'material_id' => $material->id,
+                    'user_id' => Auth::id(), // Usuario que hizo la venta
+                    'type' => 'Salida',      // Tipo de movimiento
+                    'quantity' => $request->cantidad_total,
+                    'reason' => 'Venta Folio: ' . $sale->folio, // Referencia clara
+                ]);
+                // -----------------------------------------------------
+
+                // 5. Generar Vales (Logística)
                 $trips = json_decode($request->trips_configuration, true);
                 
                 if (!is_array($trips) || count($trips) === 0) {

@@ -1,14 +1,17 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController; 
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\UnitController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\MaterialController;
-use App\Http\Controllers\SaleController; // <--- Faltaba importar este
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ValeController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\OperationsController; // <--- CORREGIDO: CON 'S'
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +19,7 @@ use App\Http\Controllers\SaleController; // <--- Faltaba importar este
 |--------------------------------------------------------------------------
 */
 
-// Redirección al login
+// Redirección inicial
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -26,69 +29,77 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Grupo Principal (Autenticado)
 Route::middleware('auth')->group(function () {
-    
-    // Perfil
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // --- MÓDULO DE ROLES ---
-    Route::middleware('permission:manage roles')->group(function () {
-        Route::resource('roles', RoleController::class);
+    // --- PERFIL ---
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+        Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
 
-    // --- MÓDULO USUARIOS ---
+    // --- SEGURIDAD ---
+    Route::middleware('permission:manage roles')->resource('roles', RoleController::class);
+
     Route::middleware('permission:manage users')->group(function () {
         Route::patch('/usuarios/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');
         Route::resource('users', UserController::class)->names('users');
     });
 
-    // --- MÓDULO CLIENTES ---
+    // --- CATÁLOGOS ---
     Route::middleware('permission:manage clients')->group(function () {
-        // API interna para el Wizard de Ventas (AJAX)
         Route::get('/api/clients/{id}', [ClientController::class, 'getById']);
-        
         Route::delete('/clients/{client}/force', [ClientController::class, 'forceDelete'])->name('clients.forceDelete');
         Route::resource('clients', ClientController::class);
-    }); 
+    });
 
-    // --- MÓDULO MATERIALES ---
+    Route::get('/materials/{material}/history', [MaterialController::class, 'history'])->name('materials.history');
     Route::resource('materials', MaterialController::class);
 
-    // --- MÓDULO UNIDADES ---
-    Route::post('/units', [UnitController::class, 'store'])->name('units.store');
-    Route::get('/units/gafete/{uuid}', [UnitController::class, 'descargarGafete'])->name('units.gafete');
-    Route::get('/check-access/{uuid}', [UnitController::class, 'validateAccess'])->name('units.validate_access');
-    Route::get('/units', [UnitController::class, 'index'])->name('units.index');
-    Route::get('/units/{id}/edit', [UnitController::class, 'edit'])->name('units.edit');
-    Route::put('/units/{id}', [UnitController::class, 'update'])->name('units.update');
-    Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
+    Route::controller(UnitController::class)->prefix('units')->name('units.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::get('/gafete/{uuid}', 'descargarGafete')->name('gafete');
+        Route::get('/check-access/{uuid}', 'validateAccess')->name('validate_access');
+    });
 
-    // --- MÓDULO VENTAS (SALES) ---
-    Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
-    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
-    Route::get('/sales/{id}', [SaleController::class, 'show'])->name('sales.show');
-    Route::get('/sales', [App\Http\Controllers\SaleController::class, 'index'])->name('sales.index');   
-    Route::get('/vales/{id}/history', [App\Http\Controllers\ValeController::class, 'history'])->name('vales.history');
-    Route::post('/vales/{id}/restore', [App\Http\Controllers\ValeController::class, 'restore'])->name('vales.restore');
+    // --- OPERACIONES (VENTAS Y VALES) ---
+    Route::controller(SaleController::class)->prefix('sales')->name('sales.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{id}', 'show')->name('show');
+        Route::get('/{id}/ticket', 'ticket')->name('ticket');
+        Route::get('/{id}/pdf', 'pdf')->name('pdf');
+        Route::get('/{id}/email', 'email')->name('email');
+    });
 
-    
-    Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
-    Route::get('/sales/{id}/pdf', [SaleController::class, 'pdf'])->name('sales.pdf');
-    Route::get('/sales/{id}/email', [SaleController::class, 'email'])->name('sales.email');
-    Route::post('/vales/{id}/status', [App\Http\Controllers\ValeController::class, 'updateStatus'])->name('vales.status');  
+    Route::controller(ValeController::class)->prefix('vales')->name('vales.')->group(function () {
+        Route::get('/{id}/history', 'history')->name('history');
+        Route::post('/{id}/restore', 'restore')->name('restore');
+        Route::post('/{id}/status', 'updateStatus')->name('status');
+        Route::get('/export/{format}', 'export')->name('export');
+    });
 
-    // --- RUTAS DE OPERACIONES (CASETA) ---
-    Route::get('/scanner', [App\Http\Controllers\OperationsController::class, 'index'])->name('operations.scanner');
-    Route::post('/scanner/lookup', [App\Http\Controllers\OperationsController::class, 'lookup'])->name('operations.lookup');
-    Route::post('/scanner/register', [App\Http\Controllers\OperationsController::class, 'register'])->name('operations.register');
-    Route::get('/vales/export/{format}', [App\Http\Controllers\ValeController::class, 'export'])->name('vales.export');
+    Route::controller(OperationsController::class)->group(function () {
+        // Vista del escáner
+        Route::get('/scanner', 'index')->name('scanner.index'); 
+        
+        // Rutas API para el JS del escáner
+        Route::post('/operations/lookup', 'lookup')->name('operations.lookup');
+        Route::post('/operations/register', 'register')->name('operations.register');
+    });
 
-    // Reportes
-    Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export/excel', [App\Http\Controllers\ReportController::class, 'exportExcel'])->name('reports.excel');
-    Route::get('/reports/export/pdf', [App\Http\Controllers\ReportController::class, 'exportPdf'])->name('reports.pdf');
+    // --- REPORTES ---
+    Route::controller(ReportController::class)->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export/excel', 'exportExcel')->name('excel');
+        Route::get('/export/pdf', 'exportPdf')->name('pdf');
+    });
 
 });
 

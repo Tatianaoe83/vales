@@ -138,133 +138,203 @@
             </div>
         </div>
         </div>
+<script>
+    function cameraApp() {
+        return {
+            html5QrcodeScanner: null,
+            scanning: false,
+            vale: null,
+            context: 'inicio', // inicio | entrada | salida
+            mensajeGuia: 'Escanea el Vale',
+            inputManual: '',
 
-    <script>
-        function cameraApp() {
-            return {
-                html5QrcodeScanner: null,
-                scanning: false,
-                vale: null,
-                context: 'inicio', 
-                mensajeGuia: 'Escanea el Vale',
-                inputManual: '', 
-
-                startCamera() {
-                    // Intentamos iniciar cámara
-                    this.html5QrcodeScanner = new Html5Qrcode("reader");
-                    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-                    
-                    this.html5QrcodeScanner.start({ facingMode: "environment" }, config, 
-                        (decodedText) => { this.onScanSuccess(decodedText); },
-                        (errorMessage) => { }
-                    ).then(() => {
-                        this.scanning = true;
-                    }).catch(err => {
-                        console.log('Cámara no disponible, usar modo manual');
-                        this.mensajeGuia = 'Usa código manual';
-                    });
-                },
-
-                simularEscaneo() {
-                    if(!this.inputManual) return;
-                    this.onScanSuccess(this.inputManual);
-                    this.inputManual = ''; 
-                },
-
-                async onScanSuccess(codigo) {
-                    this.playSound('beep');
-
-                    if (!this.vale) {
-                        await this.lookupVale(codigo);
-                    } else {
-                        if (this.context === 'entrada') await this.confirmarEntrada(codigo);
-                        else if (this.context === 'salida') await this.procesarComando(codigo);
-                    }
-                },
-
-                async lookupVale(codigo) {
-                    try {
-                        let res = await fetch("/operations/lookup", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
-                            body: JSON.stringify({ code: codigo })
-                        });
-                        let data = await res.json();
-
-                        if (data.status === 'success') {
-                            this.vale = data.data;
-                            this.context = data.context;
-                            if(this.context === 'entrada') this.mensajeGuia = 'Escanea QR UNIDAD';
-                            else if(this.context === 'salida') this.mensajeGuia = 'Confirma Salida';
-                        } else {
-                            await this.alertError(data.message);
-                        }
-                    } catch(e) { 
-                        await this.alertError('Error de conexión'); 
-                    }
-                },
-
-                async confirmarEntrada(qrUnidad) { await this.enviarServidor('confirmar_entrada', qrUnidad); },
-
-                async procesarComando(codigo) {
-                    let cmd = codigo.toUpperCase();
-                    if(cmd.includes('SURTIDO')) await this.enviarServidor('salida_surtido');
-                    else if(cmd.includes('VACIO')) await this.enviarServidor('salida_vacio');
-                    else {
-                        await this.alertError('Código inválido. Escanee comando.');
-                    }
-                },
-
-                async enviarServidor(accion, unitCode = null) {
-                    try {
-                        let res = await fetch("/operations/register", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
-                            body: JSON.stringify({ vale_id: this.vale.id, accion: accion, unit_code: unitCode })
-                        });
-                        let data = await res.json();
-
-                        if (data.status === 'success') {
-                            this.playSound('success');
-                            await Swal.fire({ 
-                                icon: 'success', 
-                                title: '¡Aprobado!', 
-                                text: data.message, 
-                                timer: 2000, 
-                                showConfirmButton: false,
-                                background: '#f0fdf4',
-                                iconColor: '#16a34a'
-                            });
-                            this.resetTodo();
-                        } else {
-                            await this.alertError(data.message);
-                        }
-                    } catch(e) {
-                        await this.alertError('Error del servidor');
-                    }
-                },
-
-                resetTodo() {
-                    this.vale = null;
-                    this.context = 'inicio';
-                    this.mensajeGuia = 'Escanea el Vale';
-                    this.inputManual = '';
-                },
-
-                async alertError(msg) {
-                    this.playSound('error');
-                    await Swal.fire({ icon: 'error', title: 'Alto', text: msg, confirmButtonColor: '#ef4444' });
-                },
-
-                playSound(type) {
-                    let a = new Audio();
-                    if(type=='beep') a.src='https://www.soundjay.com/button/beep-07.mp3';
-                    if(type=='success') a.src='https://www.soundjay.com/misc/sounds/magic-chime-01.mp3';
-                    if(type=='error') a.src='https://www.soundjay.com/button/button-10.mp3';
-                    a.play().catch(e=>{});
+            // --- 1. INICIALIZACIÓN DE CÁMARA ---
+            async startCamera() {
+                // Limpiamos si había una cámara prendida antes
+                if (this.html5QrcodeScanner) {
+                    try { await this.html5QrcodeScanner.stop(); } catch (e) {}
                 }
+
+                // Esperamos un poco para que el HTML (el div "reader") exista
+                await new Promise(r => setTimeout(r, 300));
+
+                this.html5QrcodeScanner = new Html5Qrcode("reader");
+
+                // Configuración "Todo Terreno" para móviles
+                const config = { 
+                    fps: 10, // Cuadros por segundo (10 es estable)
+                    // qrbox: { width: 250, height: 250 }, // COMENTADO: Para que lea toda la pantalla
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true // Usa el lector nativo de Android/iOS (Más rápido)
+                    },
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // Solo busca QR
+                };
+                
+                try {
+                    // Intento 1: Cámara Trasera (Environment)
+                    await this.html5QrcodeScanner.start(
+                        { facingMode: "environment" }, 
+                        config, 
+                        (decodedText) => { this.onScanSuccess(decodedText); },
+                        (errorMessage) => { /* Ignoramos errores de lectura frame a frame */ }
+                    );
+                    this.scanning = true;
+                } catch (err) {
+                    console.error("Fallo cámara trasera, intentando frontal...", err);
+                    
+                    // Intento 2: Cualquier cámara disponible (Fallback)
+                    try {
+                        await this.html5QrcodeScanner.start(
+                            { facingMode: "user" }, 
+                            config, 
+                            (decodedText) => { this.onScanSuccess(decodedText); },
+                            (errorMessage) => {}
+                        );
+                        this.scanning = true;
+                    } catch (err2) {
+                        await Swal.fire('Error', 'No se pudo abrir la cámara. Verifica permisos y HTTPS.', 'error');
+                        this.mensajeGuia = 'Usa código manual';
+                    }
+                }
+            },
+
+            // --- 2. LÓGICA DE ESCANEO ---
+            simularEscaneo() {
+                if(!this.inputManual) return;
+                this.onScanSuccess(this.inputManual);
+                this.inputManual = ''; 
+            },
+
+            async onScanSuccess(codigo) {
+                // Pausa visual para no leer 2 veces lo mismo
+                if(this.html5QrcodeScanner) {
+                    try { await this.html5QrcodeScanner.pause(); } catch(e){}
+                }
+
+                this.playSound('beep');
+
+                // Lógica Principal:
+                if (!this.vale) {
+                    // A. Si no hay vale cargado, buscamos qué es este código
+                    await this.lookupVale(codigo);
+                } else {
+                    // B. Si ya hay vale, estamos validando el paso siguiente
+                    if (this.context === 'entrada') await this.confirmarEntrada(codigo);
+                    else if (this.context === 'salida') await this.procesarComando(codigo);
+                }
+
+                // Reanudar cámara
+                if(this.html5QrcodeScanner) {
+                    try { await this.html5QrcodeScanner.resume(); } catch(e){}
+                }
+            },
+
+            // --- 3. CONEXIÓN CON LARAVEL (LOOKUP) ---
+            async lookupVale(codigo) {
+                try {
+                    let res = await fetch("/operations/lookup", {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json", 
+                            "Accept": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content 
+                        },
+                        body: JSON.stringify({ code: codigo })
+                    });
+
+                    if (!res.ok) throw new Error(`Error: ${res.status}`);
+                    let data = await res.json();
+
+                    if (data.status === 'success') {
+                        this.vale = data.data;
+                        this.context = data.context; // Laravel nos dice si toca 'entrada' o 'salida'
+                        
+                        if(this.context === 'entrada') this.mensajeGuia = 'Escanea QR UNIDAD';
+                        else if(this.context === 'salida') this.mensajeGuia = 'Confirma Salida';
+                        
+                    } else {
+                        await this.alertError(data.message);
+                    }
+                } catch(e) { 
+                    await this.alertError('Fallo de red: ' + e.message); 
+                }
+            },
+
+            // --- 4. ACCIONES (REGISTRO) ---
+            async confirmarEntrada(qrUnidad) { 
+                // Aquí extraemos el UUID si el QR es una URL
+                let uuidLimpio = this.limpiarCodigo(qrUnidad);
+                await this.enviarServidor('confirmar_entrada', uuidLimpio); 
+            },
+
+            async procesarComando(codigo) {
+                let cmd = codigo.toUpperCase();
+                if(cmd.includes('SURTIDO')) await this.enviarServidor('salida_surtido');
+                else if(cmd.includes('VACIO')) await this.enviarServidor('salida_vacio');
+                else await this.alertError('Código inválido. Escanea SURTIDO o VACÍO.');
+            },
+
+            async enviarServidor(accion, unitCode = null) {
+                try {
+                    let res = await fetch("/operations/register", {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json", 
+                            "Accept": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content 
+                        },
+                        body: JSON.stringify({ vale_id: this.vale.id, accion: accion, unit_code: unitCode })
+                    });
+
+                    if (!res.ok) throw new Error(`Error: ${res.status}`);
+                    let data = await res.json();
+
+                    if (data.status === 'success') {
+                        this.playSound('success');
+                        await Swal.fire({ 
+                            icon: 'success', title: '¡Correcto!', text: data.message, 
+                            timer: 2000, showConfirmButton: false, background: '#f0fdf4', iconColor: '#16a34a'
+                        });
+                        this.resetTodo(); // Limpiamos pantalla para el siguiente camión
+                    } else {
+                        await this.alertError(data.message);
+                    }
+                } catch(e) {
+                    await this.alertError('Fallo al guardar: ' + e.message);
+                }
+            },
+
+            // Utilidad: Limpia si el QR es una URL completa (http://.../uuid)
+            limpiarCodigo(codigo) {
+                if (!codigo) return '';
+                if (codigo.includes('http') || codigo.includes('/')) {
+                    let partes = codigo.split('/');
+                    return partes[partes.length - 1]; 
+                }
+                return codigo;
+            },
+
+            resetTodo() {
+                this.vale = null;
+                this.context = 'inicio';
+                this.mensajeGuia = 'Escanea el Vale';
+                this.inputManual = '';
+            },
+
+            async alertError(msg) {
+                this.playSound('error');
+                await Swal.fire({ icon: 'error', title: 'Alto', text: msg, confirmButtonColor: '#ef4444' });
+            },
+
+            playSound(type) {
+                let a = new Audio();
+                if(type=='beep') a.src='https://www.soundjay.com/button/beep-07.mp3';
+                if(type=='success') a.src='https://www.soundjay.com/misc/sounds/magic-chime-01.mp3';
+                if(type=='error') a.src='https://www.soundjay.com/button/button-10.mp3';
+                a.play().catch(e=>{});
             }
         }
-    </script>
+    }
+</script>
 </body>
 </html>

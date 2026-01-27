@@ -152,10 +152,11 @@
                                                     <p class="text-xs font-bold text-gray-700" x-text="trip.name"></p>
                                                     <div class="flex items-center gap-2 mt-1">
                                                         <label class="text-xs text-gray-400">Carga:</label>
-                                                        <input type="number" step="0.01" x-model="trip.amount" @input="calculateTotals()" 
-                                                               :readonly="mode === 'auto'"
-                                                               :class="{'bg-gray-100 text-gray-500': mode === 'auto', 'bg-white text-blue-600': mode === 'manual'}"
-                                                               class="w-24 p-1 text-xs border-gray-300 rounded text-center font-bold">
+                                                        <input type="number" step="0.01" x-model="trip.amount" 
+       @input="validateTripLimit(trip)" 
+       :readonly="mode === 'auto'"
+       :class="{'bg-gray-100 text-gray-500': mode === 'auto', 'bg-white text-blue-600': mode === 'manual'}"
+       class="w-24 p-1 text-xs border-gray-300 rounded text-center font-bold">
                                                         <span class="text-xs text-gray-400" x-text="unitLabel"></span>
                                                     </div>
                                                 </div>
@@ -181,158 +182,211 @@
                     </form>
                 </div>
 
-                <div class="lg:col-span-1">
-                    <div class="bg-white p-6 rounded-2xl shadow-xl border border-blue-100 sticky top-6">
-                        <h4 class="text-lg font-bold text-gray-800 mb-6 border-b pb-2">Resumen</h4>
-                        <div class="space-y-4 text-sm">
-                            <div class="flex justify-between text-gray-600">
-                                <span>Subtotal</span> <span class="font-medium">$<span x-text="subtotal.toFixed(2)"></span></span>
-                            </div>
-                            <div class="flex justify-between text-gray-600">
-                                <span>IVA (16%)</span> <span class="font-medium">$<span x-text="iva.toFixed(2)"></span></span>
-                            </div>
-                            <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
-                                <span class="text-lg font-bold text-gray-800">Total</span>
-                                <span class="text-2xl font-extrabold text-blue-600">$<span x-text="total.toFixed(2)"></span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="lg:col-span-1">
+    <div class="bg-white p-6 rounded-2xl shadow-xl border border-blue-100 sticky top-6">
+        <h4 class="text-lg font-bold text-gray-800 mb-6 border-b pb-2">Resumen</h4>
+        <div class="space-y-3 text-sm">
+            
+            <div class="flex justify-between text-gray-400 text-xs">
+                <span>Importe</span> 
+                <span>$<span x-text="(cantidad * precio).toFixed(2)"></span></span>
+            </div>
+
+            <div class="flex justify-between text-red-500 font-medium" x-show="descuentoPorcentaje > 0" x-transition>
+                <span>Descuento (<span x-text="descuentoPorcentaje"></span>%)</span> 
+                <span>-$<span x-text="((cantidad * precio) * (descuentoPorcentaje / 100)).toFixed(2)"></span></span>
+            </div>
+
+            <div class="border-t border-gray-100 my-2"></div>
+
+            <div class="flex justify-between text-gray-600">
+                <span>Subtotal</span> 
+                <span class="font-medium">$<span x-text="subtotal.toFixed(2)"></span></span>
+            </div>
+
+            <div class="flex justify-between text-gray-600">
+                <span>IVA (16%)</span> 
+                <span class="font-medium">$<span x-text="iva.toFixed(2)"></span></span>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-lg font-bold text-gray-800">Total</span>
+                <span class="text-2xl font-extrabold text-blue-600">$<span x-text="total.toFixed(2)"></span></span>
+            </div>
+        </div>
+    </div>
+</div>
 
             </div>
         </div>
     </div>
 
-    <script>
-        function salesWizard(allUnitsDb) {
-            return {
-                clientId: '', clientRfc: '', materialId: '', unitLabel: 'm³',
-                cantidad: 0, precio: 0, descuentoPorcentaje: 0,
-                subtotal: 0, montoDescuento: 0, iva: 0, total: 0,
-                
-                mode: 'auto',
-                allUnits: allUnitsDb, 
-                clientUnits: [],
-                trips: [],
+<script>
+    function salesWizard(allUnitsDb) {
+        return {
+            clientId: '', clientRfc: '', materialId: '', unitLabel: 'm³',
+            cantidad: 0, precio: 0, descuentoPorcentaje: 0,
+            subtotal: 0, montoDescuento: 0, iva: 0, total: 0,
+            
+            mode: 'auto',
+            allUnits: allUnitsDb, 
+            clientUnits: [],
+            trips: [],
 
-                get totalDistributed() {
-                    return this.trips.reduce((acc, trip) => acc + parseFloat(trip.amount || 0), 0);
-                },
+            get totalDistributed() {
+                return this.trips.reduce((acc, trip) => acc + parseFloat(trip.amount || 0), 0);
+            },
 
-                get remaining() {
-                    return Math.max(0, this.cantidad - this.totalDistributed);
-                },
+            get remaining() {
+                return Math.max(0, this.cantidad - this.totalDistributed);
+            },
 
-                get progressPercentage() {
-                    if(this.cantidad <= 0) return 0;
-                    return Math.min(100, (this.totalDistributed / this.cantidad) * 100);
-                },
+            get progressPercentage() {
+                if(this.cantidad <= 0) return 0;
+                return Math.min(100, (this.totalDistributed / this.cantidad) * 100);
+            },
 
-                onClientChange() {
-                    this.fetchClientData();
-                    this.clientUnits = this.allUnits.filter(u => u.client_id == this.clientId);
+            onClientChange() {
+                this.fetchClientData();
+                this.clientUnits = this.allUnits.filter(u => u.client_id == this.clientId);
+                this.autoAssignLogistics();
+            },
+
+            recalcEverything() {
+                this.calculateTotals();
+                this.autoAssignLogistics();
+            },
+
+            setMode(newMode) {
+                this.mode = newMode;
+                if(newMode === 'auto') {
                     this.autoAssignLogistics();
-                },
-
-                recalcEverything() {
-                    this.calculateTotals();
-                    this.autoAssignLogistics();
-                },
-
-                setMode(newMode) {
-                    this.mode = newMode;
-                    if(newMode === 'auto') {
-                        this.autoAssignLogistics();
-                    } else {
-                      
-                        this.trips = []; 
-                    }
-                },
-
-                autoAssignLogistics() {
-                    if (this.mode !== 'auto') return; 
-                    
-                    this.trips = [];
-                    let cargaRestante = parseFloat(this.cantidad);
-
-                    if (cargaRestante <= 0) return;
-
-                    if (this.clientUnits.length === 0) {
-                        return;
-                    }
-
-                    let unitIndex = 0;
-                    
-                    while (cargaRestante > 0.01) {
-                       
-                        let sortedUnits = this.clientUnits.sort((a, b) => b.capacidad_maxima - a.capacidad_maxima);
-                        
-                        let unit = sortedUnits[unitIndex % sortedUnits.length];
-                        
-                        let capacidad = parseFloat(unit.capacidad_maxima);
-                        if(capacidad <= 0) capacidad = 99999; 
-                        let cantidadParaEsteViaje = Math.min(capacidad, cargaRestante);
-                        
-                        this.trips.push({
-                            unit_id: unit.id,
-                            name: unit.placa + ' - ' + unit.tipo_vehiculo,
-                            amount: parseFloat(cantidadParaEsteViaje.toFixed(2))
-                        });
-
-                        cargaRestante -= cantidadParaEsteViaje;
-                        unitIndex++;
-
-                        if(unitIndex > 100) break;
-                    }
-                },
-
-                addTrip(id, name, cap) {
-                    let amountToAdd = 0;
-                    if (cap > 0) amountToAdd = Math.min(cap, this.remaining);
-                    else amountToAdd = this.remaining;
-                    
-                    amountToAdd = Math.round(amountToAdd * 100) / 100;
-
-                    this.trips.push({ unit_id: id, name: name, amount: amountToAdd });
-                },
-
-                removeTrip(index) {
-                    this.trips.splice(index, 1);
-                },
-
-                submitForm() {
-                    if (this.remaining > 0.1) {
-                        alert('Aún falta material por asignar.');
-                        return;
-                    }
-                    document.getElementById('saleForm').submit();
-                },
-
-                fetchClientData() {
-                    const select = document.querySelector(`select[name="client_id"]`);
-                    if(!select.selectedIndex) return;
-                    const option = select.options[select.selectedIndex];
-                    this.clientRfc = option.getAttribute('data-rfc') || '';
-                },
-
-                updatePrice() {
-                    const select = document.querySelector(`select[name="material_id"]`);
-                    const option = select.options[select.selectedIndex];
-                    if(option.value) {
-                        this.precio = parseFloat(option.getAttribute('data-price')) || 0;
-                        this.unitLabel = option.getAttribute('data-unit') || 'm³';
-                        this.recalcEverything();
-                    }
-                },
-
-                calculateTotals() {
-                    let rawSubtotal = (parseFloat(this.cantidad) || 0) * (parseFloat(this.precio) || 0);
-                    this.montoDescuento = rawSubtotal * ((parseFloat(this.descuentoPorcentaje) || 0) / 100);
-                    this.subtotal = rawSubtotal - this.montoDescuento;
-                    this.iva = this.subtotal * 0.16;
-                    this.total = this.subtotal + this.iva;
+                } else {
+                    this.trips = []; 
                 }
+            },
+
+            // --- NUEVA FUNCIÓN DE VALIDACIÓN ---
+            validateTripLimit(trip) {
+                // 1. Si es modo auto, no validamos manual
+                if (this.mode === 'auto') return;
+
+                // 2. Buscamos la unidad original para saber su capacidad real
+                let unit = this.allUnits.find(u => u.id == trip.unit_id);
+
+                // 3. Si no encontramos la unidad (ej. es externa), permitimos todo
+                if (!unit) return;
+
+                let maxCap = parseFloat(unit.capacidad_maxima);
+                let currentAmount = parseFloat(trip.amount);
+
+                // 4. EL IF QUE PEDISTE: Validar si excede
+                if (currentAmount > maxCap) {
+                    // Usamos SweetAlert o un alert normal
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Capacidad Excedida',
+                        text: `La unidad ${unit.placa} solo soporta ${maxCap} ${this.unitLabel}.`,
+                        toast: true,
+                        position: 'top-end',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    
+                    // 5. Corregimos el valor al máximo permitido
+                    trip.amount = maxCap;
+                }
+                
+                // Recalculamos totales por si el número cambió
+                this.calculateTotals();
+            },
+            // -----------------------------------
+
+            autoAssignLogistics() {
+                if (this.mode !== 'auto') return; 
+                
+                this.trips = [];
+                let cargaRestante = parseFloat(this.cantidad);
+
+                if (cargaRestante <= 0) return;
+
+                if (this.clientUnits.length === 0) {
+                    return;
+                }
+
+                let unitIndex = 0;
+                
+                while (cargaRestante > 0.01) {
+                    
+                    let sortedUnits = this.clientUnits.sort((a, b) => b.capacidad_maxima - a.capacidad_maxima);
+                    
+                    let unit = sortedUnits[unitIndex % sortedUnits.length];
+                    
+                    let capacidad = parseFloat(unit.capacidad_maxima);
+                    if(capacidad <= 0) capacidad = 99999; 
+                    let cantidadParaEsteViaje = Math.min(capacidad, cargaRestante);
+                    
+                    this.trips.push({
+                        unit_id: unit.id,
+                        name: unit.placa + ' - ' + unit.tipo_vehiculo,
+                        amount: parseFloat(cantidadParaEsteViaje.toFixed(2))
+                    });
+
+                    cargaRestante -= cantidadParaEsteViaje;
+                    unitIndex++;
+
+                    if(unitIndex > 100) break;
+                }
+            },
+
+            addTrip(id, name, cap) {
+                let amountToAdd = 0;
+                // Al agregar manual, sugerimos lo que falta, pero sin pasarnos de la capacidad
+                if (cap > 0) amountToAdd = Math.min(cap, this.remaining);
+                else amountToAdd = this.remaining;
+                
+                amountToAdd = Math.round(amountToAdd * 100) / 100;
+
+                this.trips.push({ unit_id: id, name: name, amount: amountToAdd });
+            },
+
+            removeTrip(index) {
+                this.trips.splice(index, 1);
+            },
+
+            submitForm() {
+                if (this.remaining > 0.1) {
+                    Swal.fire('Atención', 'Aún falta material por asignar.', 'warning');
+                    return;
+                }
+                document.getElementById('saleForm').submit();
+            },
+
+            fetchClientData() {
+                const select = document.querySelector(`select[name="client_id"]`);
+                if(!select.selectedIndex) return;
+                const option = select.options[select.selectedIndex];
+                this.clientRfc = option.getAttribute('data-rfc') || '';
+            },
+
+            updatePrice() {
+                const select = document.querySelector(`select[name="material_id"]`);
+                const option = select.options[select.selectedIndex];
+                if(option.value) {
+                    this.precio = parseFloat(option.getAttribute('data-price')) || 0;
+                    this.unitLabel = option.getAttribute('data-unit') || 'm³';
+                    this.recalcEverything();
+                }
+            },
+
+            calculateTotals() {
+                let rawSubtotal = (parseFloat(this.cantidad) || 0) * (parseFloat(this.precio) || 0);
+                this.montoDescuento = rawSubtotal * ((parseFloat(this.descuentoPorcentaje) || 0) / 100);
+                this.subtotal = rawSubtotal - this.montoDescuento;
+                this.iva = this.subtotal * 0.16;
+                this.total = this.subtotal + this.iva;
             }
         }
-    </script>
+    }
+</script>
 </x-app-layout>
