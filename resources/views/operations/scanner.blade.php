@@ -155,17 +155,15 @@
                     try { await this.html5QrcodeScanner.stop(); } catch (e) {}
                 }
 
-                // Esperamos un poco para que el HTML (el div "reader") exista
                 await new Promise(r => setTimeout(r, 300));
 
                 this.html5QrcodeScanner = new Html5Qrcode("reader");
 
                 // Configuración "Todo Terreno" para móviles
                 const config = { 
-                    fps: 10, // Cuadros por segundo (10 es estable)
-                    // qrbox: { width: 250, height: 250 }, // COMENTADO: Para que lea toda la pantalla
+                    fps: 10, 
                     experimentalFeatures: {
-                        useBarCodeDetectorIfSupported: true // Usa el lector nativo de Android/iOS (Más rápido)
+                        useBarCodeDetectorIfSupported: true
                     },
                     formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // Solo busca QR
                 };
@@ -247,7 +245,7 @@
 
                     if (data.status === 'success') {
                         this.vale = data.data;
-                        this.context = data.context; // Laravel nos dice si toca 'entrada' o 'salida'
+                        this.context = data.context; 
                         
                         if(this.context === 'entrada') this.mensajeGuia = 'Escanea QR UNIDAD';
                         else if(this.context === 'salida') this.mensajeGuia = 'Confirma Salida';
@@ -295,7 +293,7 @@
                             icon: 'success', title: '¡Correcto!', text: data.message, 
                             timer: 2000, showConfirmButton: false, background: '#f0fdf4', iconColor: '#16a34a'
                         });
-                        this.resetTodo(); // Limpiamos pantalla para el siguiente camión
+                        this.resetTodo();
                     } else {
                         await this.alertError(data.message);
                     }

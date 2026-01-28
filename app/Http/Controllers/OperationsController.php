@@ -9,45 +9,47 @@ use App\Models\Unit;
 
 class OperationsController extends Controller
 {
-    // Vista del Escáner
     public function index()
     {
         return view('operations.scanner');
     }
 
-    // Paso 1: Buscar el Vale y determinar qué hacer
+    // PASO 1: Lookup del Vale
     public function lookup(Request $request)
     {
-        $request->validate(['code' => 'required']);
-
-        // Buscamos por UUID (QR) o Folio legible
-        $vale = Vale::with(['material', 'unit', 'sale.client'])
-                    ->where('uuid', $request->code)
-                    ->orWhere('folio_vale', $request->code)
-                    ->first();
-
-        if (!$vale) {
-            return response()->json(['status' => 'error', 'message' => 'Código de VALE no encontrado.'], 404);
+        if (!$request->code) {
+            return $this->error('CODIGO_VACIO', 'Escanee o capture un código');
         }
 
-        $context = ''; 
+        $vale = Vale::with(['material', 'unit', 'sale.client'])
+            ->where('uuid', $request->code)
+            ->orWhere('folio_vale', $request->code)
+            ->first();
 
-        // Máquina de estados
+        if (!$vale) {
+            return $this->error('VALE_NO_EXISTE', 'Vale no encontrado');
+        }
+
         switch ($vale->estatus) {
             case 'Vigente':
-                $context = 'entrada'; // Toca validar entrada
+                $context = 'entrada';
                 break;
+
             case 'En Planta':
-                $context = 'salida';  // Toca validar salida
+                $context = 'salida';
                 break;
+
             case 'Surtido':
-                return response()->json(['status' => 'error', 'message' => 'Este vale YA FUE SURTIDO anteriormente.'], 422);
+                return $this->error('VALE_SURTIDO', 'Este vale ya fue surtido');
+
             case 'Vencido':
-                return response()->json(['status' => 'error', 'message' => 'VALE VENCIDO. No dar acceso.'], 422);
+                return $this->error('VALE_VENCIDO', 'Vale vencido. No permitir acceso');
+
             case 'Cancelado':
-                return response()->json(['status' => 'error', 'message' => 'VALE CANCELADO.'], 422);
+                return $this->error('VALE_CANCELADO', 'Vale cancelado');
+
             default:
-                $context = 'error';
+                return $this->error('ESTATUS_INVALIDO', 'Estatus del vale no válido');
         }
 
         return response()->json([
@@ -57,76 +59,88 @@ class OperationsController extends Controller
         ]);
     }
 
-    // Paso 2: Registrar la Acción (Entrada o Salida)
+    // PASO 2: Registro de acciones
     public function register(Request $request)
     {
-        $request->validate([
-            'vale_id' => 'required|exists:vales,id',
-            'accion' => 'required|in:confirmar_entrada,salida_surtido,salida_vacio',
-            'unit_code' => 'nullable'
-        ]);
+        if (!$request->vale_id || !$request->accion) {
+            return $this->error('DATOS_INCOMPLETOS', 'Información incompleta');
+        }
 
-        $vale = Vale::with('unit')->findOrFail($request->vale_id);
+        $vale = Vale::with('unit')->find($request->vale_id);
+
+        if (!$vale) {
+            return $this->error('VALE_NO_EXISTE', 'Vale no encontrado');
+        }
+
         $estatusAnterior = $vale->estatus;
         $nuevoEstatus = '';
         $comentario = '';
 
-        // --- CASO A: ENTRADA (Guardamos fecha_entrada) ---
+        // ENTRADA
         if ($request->accion === 'confirmar_entrada') {
-            
-            // Si el vale tiene unidad asignada, verificamos QR
+
+            if ($vale->estatus !== 'Vigente') {
+                return $this->error('ENTRADA_DUPLICADA', 'La entrada ya fue registrada');
+            }
+
             if ($vale->unit) {
+
                 if (!$request->unit_code) {
-                    return response()->json(['status' => 'error', 'message' => 'Debe escanear el QR de la unidad para validar.'], 422);
+                    return $this->error('QR_UNIDAD_REQUERIDO', 'Escanee el QR de la unidad');
                 }
 
                 $unidadEscaneada = Unit::where('uuid', $request->unit_code)
-                                       ->orWhere('placa', $request->unit_code)
-                                       ->first();
+                    ->orWhere('placa', $request->unit_code)
+                    ->first();
 
                 if (!$unidadEscaneada) {
-                    return response()->json(['status' => 'error', 'message' => 'El QR de la unidad no existe en el sistema.'], 422);
+                    return $this->error('UNIDAD_NO_EXISTE', 'Unidad no registrada en el sistema');
                 }
 
-                // Validación de seguridad: Placas coinciden
                 if ($unidadEscaneada->id !== $vale->unit_id) {
-                    return response()->json([
-                        'status' => 'error', 
-                        'message' => "¡ERROR DE SEGURIDAD!\nEl vale pertenece a: {$vale->unit->placa}\nUnidad escaneada: {$unidadEscaneada->placa}"
-                    ], 422);
+                    return $this->error(
+                        'UNIDAD_NO_COINCIDE',
+                        "Unidad incorrecta. Vale asignado a {$vale->unit->placa}"
+                    );
                 }
             }
 
             $nuevoEstatus = 'En Planta';
-            $comentario = 'Entrada registrada. Validación Vale + Unidad correcta.';
-            
-            // GUARDAR HORA DE ENTRADA
+            $comentario = 'Entrada registrada correctamente';
             $vale->fecha_entrada = now();
         }
 
-        // --- CASO B: SALIDA SURTIDO (Guardamos fecha_salida) ---
+        // SALIDA SURTIDO
         elseif ($request->accion === 'salida_surtido') {
-            $nuevoEstatus = 'Surtido';
-            $comentario = 'Salida completa. Material surtido.';
 
-            // GUARDAR HORA DE SALIDA
+            if ($vale->estatus !== 'En Planta') {
+                return $this->error('SALIDA_INVALIDA', 'La unidad no está en planta');
+            }
+
+            $nuevoEstatus = 'Surtido';
+            $comentario = 'Salida con carga';
             $vale->fecha_salida = now();
         }
-        
-        // --- CASO C: SALIDA VACÍO (Regresa a la fila) ---
+
+        // SALIDA VACÍO
         elseif ($request->accion === 'salida_vacio') {
+
+            if ($vale->estatus !== 'En Planta') {
+                return $this->error('SALIDA_INVALIDA', 'La unidad no está en planta');
+            }
+
             $nuevoEstatus = 'Vigente';
-            $comentario = 'Salida SIN carga. El vale regresa a estatus Vigente.';
-            
-            // Opcional: Reiniciamos la entrada para que cuente bien la próxima vez
-            $vale->fecha_entrada = null; 
+            $comentario = 'Salida sin carga';
+            $vale->fecha_entrada = null;
         }
 
-        // Aplicamos cambios al Vale
+        else {
+            return $this->error('ACCION_INVALIDA', 'Acción no reconocida');
+        }
+
         $vale->estatus = $nuevoEstatus;
         $vale->save();
 
-        // Guardamos Historial
         ValeHistory::create([
             'vale_id' => $vale->id,
             'user_id' => auth()->id(),
@@ -135,6 +149,18 @@ class OperationsController extends Controller
             'comentarios' => $comentario
         ]);
 
-        return response()->json(['status' => 'success', 'message' => 'Movimiento registrado correctamente.']);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Movimiento registrado correctamente'
+        ]);
+    }
+
+    private function error($code, $message)
+    {
+        return response()->json([
+            'status' => 'error',
+            'code' => $code,
+            'message' => $message
+        ]);
     }
 }

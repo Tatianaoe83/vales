@@ -34,34 +34,38 @@ class MaterialController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'nullable|string|unique:materials,code',
-            'unit' => 'required|string|max:50',
+            'code' => 'nullable|string|max:50|unique:materials,code',
+            'unit' => 'required|string|in:m3,ton,kg,lts,pza',
             'price' => 'required|numeric|min:0',
-            'stock' => 'integer|min:0',
+            
+            // AQUÍ ESTÁ EL CAMBIO: min:1 obliga a que haya al menos 1 en stock
+            'stock' => 'required|integer|min:1', 
+            
+            'description' => 'nullable|string',
+        ], [
+            'stock.min' => 'El stock inicial debe ser al menos 1.',
+            'stock.required' => 'Debes ingresar un stock inicial.',
         ]);
 
-        // 1. Crear el Material
         $material = Material::create($request->all());
 
-        // 2. Registrar Precio Inicial
-        MaterialPriceHistory::create([
+        // Opcional: Registrar este stock inicial como el primer movimiento
+        \App\Models\StockMovement::create([
             'material_id' => $material->id,
-            'price' => $material->price,
+            'user_id' => auth()->id(),
+            'type' => 'Entrada',
+            'quantity' => $request->stock,
+            'reason' => 'Stock Inicial (Alta de material)'
+        ]);
+
+        // Opcional: Registrar precio inicial
+        \App\Models\MaterialPriceHistory::create([
+            'material_id' => $material->id,
+            'price' => $request->price,
             'changed_at' => now(),
         ]);
 
-        // 3. Registrar Stock Inicial (Si es mayor a 0)
-        if ($material->stock > 0) {
-            StockMovement::create([
-                'material_id' => $material->id,
-                'user_id' => Auth::id(), // Usuario actual
-                'type' => 'Entrada',
-                'quantity' => $material->stock,
-                'reason' => 'Inventario Inicial',
-            ]);
-        }
-
-        return redirect()->route('materials.index')->with('success', 'Material registrado correctamente.');
+        return redirect()->route('materials.index')->with('success', 'Material creado con stock inicial.');
     }
 
     public function edit(Material $material)
