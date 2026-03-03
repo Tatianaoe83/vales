@@ -11,13 +11,19 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ValeController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\OperationsController; // <--- CORREGIDO: CON 'S'
+use App\Http\Controllers\OperationsController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
+Route::prefix('calificacion')->name('calificacion.')->group(function () {
+    Route::get('/',        [App\Http\Controllers\CalificacionController::class, 'index'])  ->name('index');
+    Route::get('/check',   [App\Http\Controllers\CalificacionController::class, 'check'])  ->name('check');
+    Route::post('/rate',   [App\Http\Controllers\CalificacionController::class, 'store'])  ->name('store');
+    Route::post('/skip',   [App\Http\Controllers\CalificacionController::class, 'skip'])   ->name('skip');
+});
 
 // Redirección inicial
 Route::get('/', function () {
