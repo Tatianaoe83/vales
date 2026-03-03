@@ -242,7 +242,7 @@
         function materialTable() {
             return {
                 showModal: false,
-                activeTab: 'stock', // 'stock' or 'prices'
+                activeTab: 'stock',
                 selectedName: '',
                 stockMovements: [],
                 priceHistory: [],
@@ -251,7 +251,7 @@
                     this.selectedName = name;
                     this.stockMovements = []; 
                     this.priceHistory = [];
-                    this.activeTab = 'stock'; // Resetear a la primera tab
+                    this.activeTab = 'stock';
                     this.showModal = true;
                     
                     try {
@@ -262,7 +262,6 @@
                         
                         let data = await response.json();
                         
-                        // Ahora esperamos recibir un objeto { stock: [], prices: [] }
                         this.stockMovements = data.stock || [];
                         this.priceHistory = data.prices || [];
 

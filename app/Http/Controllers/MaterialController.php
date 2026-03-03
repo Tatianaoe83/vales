@@ -35,7 +35,7 @@ class MaterialController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:materials,code',
-            'unit' => 'required|string|in:m3,ton,kg,lts,pza',
+            'unit' => 'required|string|in:m3,ton,pza,saco',
             'price' => 'required|numeric|min:0',
             
             // AQUÍ ESTÁ EL CAMBIO: min:1 obliga a que haya al menos 1 en stock
