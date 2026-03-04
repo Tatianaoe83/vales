@@ -8,7 +8,9 @@ class Sale extends Model
 {
     protected $fillable = [
         'folio', 'client_id', 'user_id', 'tipo_venta', 
-        'fecha_vencimiento', 'subtotal', 'descuento', 'iva', 'total', 'notas'
+        'fecha_vencimiento', 'subtotal', 'descuento', 
+        'iva', 'total', 'notas','pendiente_calificacion',  
+        'calificacion','calificacion_at'
     ];
 
     public function vales()
