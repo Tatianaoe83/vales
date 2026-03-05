@@ -5,334 +5,434 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <title>Scanner Logística</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        #reader { width: 100%; height: 100%; object-fit: cover; }
-        #reader video { object-fit: cover; border-radius: 1rem; }
+        * { font-family: 'Inter', sans-serif; }
+        #reader { width: 100%; height: 100%; }
+        #reader video { object-fit: cover; width: 100% !important; height: 100% !important; border-radius: 0; }
+        #reader > div { display: none !important; } /* oculta controles nativos de html5-qrcode */
         [x-cloak] { display: none !important; }
+
+        /* Barra de cooldown */
+        @keyframes cooldown-bar {
+            from { width: 100%; }
+            to   { width: 0%; }
+        }
+        .cooldown-bar-anim {
+            animation: cooldown-bar linear forwards;
+        }
     </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col font-sans" x-data="cameraApp()" x-init="startCamera()">
+<body class="bg-gray-50 min-h-screen flex flex-col" x-data="cameraApp()" x-init="startCamera()">
 
-    <div class="bg-white h-16 flex justify-between items-center px-4 shadow-sm z-20 sticky top-0 border-b border-gray-200">
+    {{-- ── HEADER ── --}}
+    <div class="bg-white h-16 flex justify-between items-center px-4 shadow-sm z-20 sticky top-0 border-b border-gray-100">
         <div class="flex items-center gap-3">
-            <div class="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow-md">
-                <i class="fas fa-eye"></i>
+            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
             </div>
             <div>
-                <h1 class="font-bold text-gray-800 leading-tight">Caseta Visor</h1>
-                <div class="flex items-center gap-1">
-                    <div class="w-2 h-2 rounded-full" :class="scanning ? 'bg-green-500 animate-pulse' : 'bg-red-500'"></div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide" x-text="scanning ? 'CAMARA ACTIVA' : 'EN PAUSA'"></span>
+                <h1 class="text-sm text-gray-900 leading-tight" style="font-weight:800;">Caseta Visor</h1>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full transition-colors" :class="scanning ? 'bg-green-400 animate-pulse' : 'bg-red-400'"></div>
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;" x-text="scanning ? 'CÁMARA ACTIVA' : 'EN PAUSA'"></span>
                 </div>
             </div>
         </div>
-        
+
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="text-gray-400 hover:text-red-500 transition p-2">
-                <i class="fas fa-power-off text-lg"></i>
+            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
             </button>
         </form>
     </div>
 
-    <div class="flex-grow flex flex-col items-center justify-start pt-4 px-4 gap-4 overflow-y-auto pb-20">
-        
-        <div class="relative w-full max-w-sm aspect-[16/9] bg-black rounded-2xl shadow-lg overflow-hidden border border-gray-300 shrink-0">
-            <div id="reader" class="w-full h-full opacity-90"></div>
+    {{-- ── CONTENIDO ── --}}
+    <div class="flex-grow flex flex-col items-center pt-5 px-4 gap-4 overflow-y-auto pb-8">
+
+        {{-- ── VISOR CÁMARA ── --}}
+        <div class="relative w-full max-w-sm bg-black rounded-2xl overflow-hidden shadow-lg border border-gray-200 shrink-0" style="aspect-ratio:16/9;">
+            <div id="reader" class="absolute inset-0"></div>
+
+            {{-- Marco de escaneo --}}
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-40 h-40 border-2 border-white/40 rounded-lg relative">
-                    <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-green-400"></div>
-                    <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-green-400"></div>
-                    <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-green-400"></div>
-                    <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-green-400"></div>
+                <div class="w-36 h-36 relative">
+                    <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-green-400 rounded-tl-sm"></div>
+                    <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-green-400 rounded-tr-sm"></div>
+                    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-green-400 rounded-bl-sm"></div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-green-400 rounded-br-sm"></div>
                 </div>
             </div>
-            <div class="absolute bottom-2 left-0 w-full text-center pointer-events-none">
-                <span class="bg-black/70 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur" x-text="mensajeGuia"></span>
+
+            {{-- Cooldown overlay --}}
+            <div x-show="cooldownActive" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 pointer-events-none">
+                <svg class="w-8 h-8 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-white text-xs" style="font-weight:700;">Espera <span x-text="cooldownRemaining"></span>s</span>
+            </div>
+
+            {{-- Barra de cooldown --}}
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
+                <div x-ref="cooldownBar" class="h-full bg-green-400 transition-none" style="width:100%;"></div>
+            </div>
+
+            {{-- Etiqueta guía --}}
+            <div class="absolute bottom-3 left-0 w-full text-center pointer-events-none">
+                <span class="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur" style="font-weight:700;" x-text="mensajeGuia"></span>
             </div>
         </div>
 
+        {{-- ── INPUT MANUAL ── --}}
         <div class="w-full max-w-sm flex gap-2" x-show="!vale">
-            <div class="relative flex-grow">
-                <i class="fas fa-keyboard absolute left-3 top-3 text-gray-400"></i>
+            <div class="relative flex-1">
+                <svg class="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
+                </svg>
                 <input type="text" x-model="inputManual" @keydown.enter="simularEscaneo()"
-                       class="w-full bg-white border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 outline-none uppercase" 
-                       placeholder="Escribir código manual...">
+                       class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none uppercase shadow-sm"
+                       style="font-weight:500;"
+                       placeholder="Código manual...">
             </div>
-            <button @click="simularEscaneo()" class="bg-gray-800 text-white px-4 rounded-lg shadow-sm hover:bg-gray-700">
-                <i class="fas fa-arrow-right"></i>
+            <button @click="simularEscaneo()"
+                    class="bg-gray-800 hover:bg-gray-900 text-white px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
             </button>
         </div>
 
-
-        <div x-show="vale" x-transition:enter="transition ease-out duration-300" 
-             x-transition:enter-start="opacity-0 translate-y-10" 
+        {{-- ── CARD DEL VALE ── --}}
+        <div x-show="vale"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-6"
              x-transition:enter-end="opacity-100 translate-y-0"
-             style="display: none;" 
-             class="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-4 relative">
-            
-            <button @click="resetTodo()" class="absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-400 rounded-full hover:bg-red-100 hover:text-red-500 transition shadow-sm">
-                <i class="fas fa-times"></i>
-            </button>
+             style="display:none;"
+             class="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-            <div class="bg-gray-800 text-white p-5 text-center relative overflow-hidden">
-                <i class="fas fa-truck absolute -left-4 -bottom-4 text-6xl text-gray-700 opacity-20 transform -rotate-12"></i>
-                
-                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Unidad Autorizada</p>
-                <h2 class="text-4xl font-black tracking-tight uppercase" 
-                    x-text="vale?.unit?.placa ?? 'EXTERNA'">
-                </h2>
-                <div class="mt-2 inline-flex items-center gap-2 bg-gray-700 px-3 py-1 rounded-full text-xs">
-                    <i class="fas fa-ticket-alt text-yellow-400"></i>
-                    <span class="font-mono text-gray-300" x-text="vale?.folio_vale"></span>
+            {{-- Header de la card --}}
+            <div class="bg-gray-900 text-white px-5 pt-5 pb-6 relative overflow-hidden">
+                {{-- Ícono decorativo --}}
+                <svg class="absolute -right-4 -bottom-4 w-24 h-24 text-white/5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                </svg>
+
+                <div class="flex items-start justify-between gap-3 mb-4">
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1" style="font-weight:800;">Unidad autorizada</p>
+                        <h2 class="text-3xl text-white tracking-tight uppercase" style="font-weight:800;" x-text="vale?.unit?.placa ?? 'EXTERNA'"></h2>
+                    </div>
+                    <button @click="resetTodo()"
+                            class="w-7 h-7 flex items-center justify-center rounded-xl bg-white/10 hover:bg-red-500/80 text-white/60 hover:text-white transition-colors shrink-0 mt-0.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full">
+                    <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 100 4v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2a2 2 0 100-4V6z"/>
+                    </svg>
+                    <span class="text-xs text-gray-300 font-mono" style="font-weight:600;" x-text="vale?.folio_vale"></span>
                 </div>
             </div>
 
-            <div class="p-5 grid grid-cols-2 gap-4 border-b border-gray-100 bg-white">
+            {{-- Datos --}}
+            <div class="p-4 grid grid-cols-2 gap-4 border-b border-gray-100">
                 <div>
-                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Carga / Material</p>
-                    <div class="flex items-start gap-2">
-                        <i class="fas fa-cubes text-blue-500 mt-1"></i>
-                        <div>
-                            <p class="font-bold text-gray-800 leading-tight" x-text="vale?.material?.name"></p>
-                            <p class="text-xs text-gray-500"><span x-text="vale?.cantidad"></span> <span x-text="vale?.material?.unit"></span></p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Cliente Destino</p>
-                    <p class="font-bold text-gray-800 text-sm truncate leading-tight" x-text="vale?.sale?.client?.name"></p>
-                </div>
-            </div>
-
-            <div class="p-4 bg-gray-50">
-                <div class="rounded-xl p-4 text-center border-2 shadow-sm transition-colors duration-300" 
-                     :class="context === 'entrada' ? 'bg-yellow-50 border-yellow-400 text-yellow-800' : 'bg-green-50 border-green-500 text-green-800'">
-                    
-                    <p class="text-xs font-bold uppercase mb-1 opacity-80" x-text="context === 'entrada' ? 'PASO 2: VALIDACIÓN' : 'PASO FINAL: SALIDA'"></p>
-                    
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fas text-2xl" :class="context === 'entrada' ? 'fa-camera' : 'fa-check-circle'"></i>
-                        <span class="font-black text-xl uppercase" x-text="context === 'entrada' ? 'ESCANEAR CAMIÓN' : 'CONFIRMAR SALIDA'"></span>
-                    </div>
-
-                    <div x-show="context === 'salida'" class="mt-3 grid grid-cols-2 gap-2">
-                        <button @click="inputManual='CMD_SURTIDO'; simularEscaneo()" class="bg-blue-600 text-white text-xs font-bold py-2 rounded-lg shadow hover:bg-blue-700">
-                            SURTIDO
-                        </button>
-                        <button @click="inputManual='CMD_VACIO'; simularEscaneo()" class="bg-white text-gray-600 text-xs font-bold py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
-                            VACÍO
-                        </button>
-                    </div>
-
-                    <p x-show="context === 'entrada'" class="text-xs mt-2 font-medium">
-                        Por favor, apunte al código QR pegado en la unidad.
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-2" style="font-weight:800;">Carga / Material</p>
+                    <p class="text-sm text-gray-800 leading-tight" style="font-weight:700;" x-text="vale?.material?.name"></p>
+                    <p class="text-xs text-blue-500 mt-0.5" style="font-weight:600;">
+                        <span x-text="vale?.cantidad"></span> <span x-text="vale?.material?.unit"></span>
                     </p>
                 </div>
+                <div>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-2" style="font-weight:800;">Cliente destino</p>
+                    <p class="text-sm text-gray-800 leading-tight truncate" style="font-weight:700;" x-text="vale?.sale?.client?.name"></p>
+                </div>
+            </div>
+
+            {{-- Panel de acción --}}
+            <div class="p-4">
+                {{-- Estado: Entrada --}}
+                <div x-show="context === 'entrada'"
+                     class="rounded-xl p-4 text-center border border-yellow-200 bg-yellow-50">
+                    <p class="text-[9px] text-yellow-600 uppercase tracking-widest mb-2" style="font-weight:800;">Paso 2 · Validación</p>
+                    <div class="flex items-center justify-center gap-2 text-yellow-700 mb-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span class="text-base uppercase" style="font-weight:800;">Escanear Camión</span>
+                    </div>
+                    <p class="text-xs text-yellow-600" style="font-weight:500;">Apunta al QR pegado en la unidad</p>
+                </div>
+
+                {{-- Estado: Salida --}}
+                <div x-show="context === 'salida'"
+                     class="rounded-xl p-4 border border-green-200 bg-green-50">
+                    <p class="text-[9px] text-green-600 uppercase tracking-widest mb-3 text-center" style="font-weight:800;">Paso Final · Confirmar Salida</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button @click="inputManual='CMD_SURTIDO'; simularEscaneo()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-2.5 rounded-xl shadow-sm transition-colors" style="font-weight:700;">
+                            Surtido
+                        </button>
+                        <button @click="inputManual='CMD_VACIO'; simularEscaneo()"
+                                class="bg-white hover:bg-gray-50 text-gray-600 text-xs py-2.5 rounded-xl border border-gray-200 shadow-sm transition-colors" style="font-weight:700;">
+                            Vacío
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-        </div>
+
+    </div>
+
 <script>
-    function cameraApp() {
-        return {
-            html5QrcodeScanner: null,
-            scanning: false,
-            vale: null,
-            context: 'inicio', // inicio | entrada | salida
-            mensajeGuia: 'Escanea el Vale',
-            inputManual: '',
+function cameraApp() {
+    return {
+        html5QrcodeScanner: null,
+        scanning: false,
+        vale: null,
+        context: 'inicio',
+        mensajeGuia: 'Escanea el vale',
+        inputManual: '',
 
-            // --- 1. INICIALIZACIÓN DE CÁMARA ---
-            async startCamera() {
-                // Limpiamos si había una cámara prendida antes
-                if (this.html5QrcodeScanner) {
-                    try { await this.html5QrcodeScanner.stop(); } catch (e) {}
-                }
+        // ── Cooldown ──
+        COOLDOWN_SECS: 7,          // segundos entre lecturas
+        cooldownActive: false,
+        cooldownRemaining: 0,
+        _cooldownTimer: null,
+        _cooldownInterval: null,
 
-                await new Promise(r => setTimeout(r, 300));
-
-                this.html5QrcodeScanner = new Html5Qrcode("reader");
-
-                // Configuración "Todo Terreno" para móviles
-                const config = { 
-                    fps: 10, 
-                    experimentalFeatures: {
-                        useBarCodeDetectorIfSupported: true
-                    },
-                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // Solo busca QR
-                };
-                
-                try {
-                    // Intento 1: Cámara Trasera (Environment)
-                    await this.html5QrcodeScanner.start(
-                        { facingMode: "environment" }, 
-                        config, 
-                        (decodedText) => { this.onScanSuccess(decodedText); },
-                        (errorMessage) => { /* Ignoramos errores de lectura frame a frame */ }
-                    );
-                    this.scanning = true;
-                } catch (err) {
-                    console.error("Fallo cámara trasera, intentando frontal...", err);
-                    
-                    // Intento 2: Cualquier cámara disponible (Fallback)
-                    try {
-                        await this.html5QrcodeScanner.start(
-                            { facingMode: "user" }, 
-                            config, 
-                            (decodedText) => { this.onScanSuccess(decodedText); },
-                            (errorMessage) => {}
-                        );
-                        this.scanning = true;
-                    } catch (err2) {
-                        await Swal.fire('Error', 'No se pudo abrir la cámara. Verifica permisos y HTTPS.', 'error');
-                        this.mensajeGuia = 'Usa código manual';
-                    }
-                }
-            },
-
-            // --- 2. LÓGICA DE ESCANEO ---
-            simularEscaneo() {
-                if(!this.inputManual) return;
-                this.onScanSuccess(this.inputManual);
-                this.inputManual = ''; 
-            },
-
-            async onScanSuccess(codigo) {
-                // Pausa visual para no leer 2 veces lo mismo
-                if(this.html5QrcodeScanner) {
-                    try { await this.html5QrcodeScanner.pause(); } catch(e){}
-                }
-
-                this.playSound('beep');
-
-                // Lógica Principal:
-                if (!this.vale) {
-                    // A. Si no hay vale cargado, buscamos qué es este código
-                    await this.lookupVale(codigo);
-                } else {
-                    // B. Si ya hay vale, estamos validando el paso siguiente
-                    if (this.context === 'entrada') await this.confirmarEntrada(codigo);
-                    else if (this.context === 'salida') await this.procesarComando(codigo);
-                }
-
-                // Reanudar cámara
-                if(this.html5QrcodeScanner) {
-                    try { await this.html5QrcodeScanner.resume(); } catch(e){}
-                }
-            },
-
-            // --- 3. CONEXIÓN CON LARAVEL (LOOKUP) ---
-            async lookupVale(codigo) {
-                try {
-                    let res = await fetch("/operations/lookup", {
-                        method: "POST",
-                        headers: { 
-                            "Content-Type": "application/json", 
-                            "Accept": "application/json",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content 
-                        },
-                        body: JSON.stringify({ code: codigo })
-                    });
-
-                    if (!res.ok) throw new Error(`Error: ${res.status}`);
-                    let data = await res.json();
-
-                    if (data.status === 'success') {
-                        this.vale = data.data;
-                        this.context = data.context; 
-                        
-                        if(this.context === 'entrada') this.mensajeGuia = 'Escanea QR UNIDAD';
-                        else if(this.context === 'salida') this.mensajeGuia = 'Confirma Salida';
-                        
-                    } else {
-                        await this.alertError(data.message);
-                    }
-                } catch(e) { 
-                    await this.alertError('Fallo de red: ' + e.message); 
-                }
-            },
-
-            // --- 4. ACCIONES (REGISTRO) ---
-            async confirmarEntrada(qrUnidad) { 
-                // Aquí extraemos el UUID si el QR es una URL
-                let uuidLimpio = this.limpiarCodigo(qrUnidad);
-                await this.enviarServidor('confirmar_entrada', uuidLimpio); 
-            },
-
-            async procesarComando(codigo) {
-                let cmd = codigo.toUpperCase();
-                if(cmd.includes('SURTIDO')) await this.enviarServidor('salida_surtido');
-                else if(cmd.includes('VACIO')) await this.enviarServidor('salida_vacio');
-                else await this.alertError('Código inválido. Escanea SURTIDO o VACÍO.');
-            },
-
-            async enviarServidor(accion, unitCode = null) {
-                try {
-                    let res = await fetch("/operations/register", {
-                        method: "POST",
-                        headers: { 
-                            "Content-Type": "application/json", 
-                            "Accept": "application/json",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content 
-                        },
-                        body: JSON.stringify({ vale_id: this.vale.id, accion: accion, unit_code: unitCode })
-                    });
-
-                    if (!res.ok) throw new Error(`Error: ${res.status}`);
-                    let data = await res.json();
-
-                    if (data.status === 'success') {
-                        this.playSound('success');
-                        await Swal.fire({ 
-                            icon: 'success', title: '¡Correcto!', text: data.message, 
-                            timer: 2000, showConfirmButton: false, background: '#f0fdf4', iconColor: '#16a34a'
-                        });
-                        this.resetTodo();
-                    } else {
-                        await this.alertError(data.message);
-                    }
-                } catch(e) {
-                    await this.alertError('Fallo al guardar: ' + e.message);
-                }
-            },
-
-            // Utilidad: Limpia si el QR es una URL completa (http://.../uuid)
-            limpiarCodigo(codigo) {
-                if (!codigo) return '';
-                if (codigo.includes('http') || codigo.includes('/')) {
-                    let partes = codigo.split('/');
-                    return partes[partes.length - 1]; 
-                }
-                return codigo;
-            },
-
-            resetTodo() {
-                this.vale = null;
-                this.context = 'inicio';
-                this.mensajeGuia = 'Escanea el Vale';
-                this.inputManual = '';
-            },
-
-            async alertError(msg) {
-                this.playSound('error');
-                await Swal.fire({ icon: 'error', title: 'Alto', text: msg, confirmButtonColor: '#ef4444' });
-            },
-
-            playSound(type) {
-                let a = new Audio();
-                if(type=='beep') a.src='https://www.soundjay.com/button/beep-07.mp3';
-                if(type=='success') a.src='https://www.soundjay.com/misc/sounds/magic-chime-01.mp3';
-                if(type=='error') a.src='https://www.soundjay.com/button/button-10.mp3';
-                a.play().catch(e=>{});
+        // ─────────────────────────────────────────
+        // 1. CÁMARA
+        // ─────────────────────────────────────────
+        async startCamera() {
+            if (this.html5QrcodeScanner) {
+                try { await this.html5QrcodeScanner.stop(); } catch (e) {}
             }
+            await new Promise(r => setTimeout(r, 300));
+            this.html5QrcodeScanner = new Html5Qrcode("reader");
+
+            const config = {
+                fps: 10,
+                experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+            };
+
+            const onSuccess = (text) => { this.onScanSuccess(text); };
+            const onError   = () => {};
+
+            try {
+                await this.html5QrcodeScanner.start({ facingMode: "environment" }, config, onSuccess, onError);
+                this.scanning = true;
+            } catch {
+                try {
+                    await this.html5QrcodeScanner.start({ facingMode: "user" }, config, onSuccess, onError);
+                    this.scanning = true;
+                } catch {
+                    this.alertError('No se pudo abrir la cámara. Verifica permisos y HTTPS.');
+                    this.mensajeGuia = 'Usa código manual';
+                }
+            }
+        },
+
+        // ─────────────────────────────────────────
+        // 2. COOLDOWN
+        // ─────────────────────────────────────────
+        startCooldown() {
+            this.cooldownActive   = true;
+            this.cooldownRemaining = this.COOLDOWN_SECS;
+
+            // Animación barra
+            const bar = this.$refs.cooldownBar;
+            if (bar) {
+                bar.style.transition = 'none';
+                bar.style.width = '100%';
+                requestAnimationFrame(() => {
+                    bar.style.transition = `width ${this.COOLDOWN_SECS}s linear`;
+                    bar.style.width = '0%';
+                });
+            }
+
+            // Contador visible
+            clearInterval(this._cooldownInterval);
+            this._cooldownInterval = setInterval(() => {
+                this.cooldownRemaining--;
+                if (this.cooldownRemaining <= 0) clearInterval(this._cooldownInterval);
+            }, 1000);
+
+            // Fin del cooldown
+            clearTimeout(this._cooldownTimer);
+            this._cooldownTimer = setTimeout(() => {
+                this.cooldownActive = false;
+                if (bar) { bar.style.transition = 'none'; bar.style.width = '100%'; }
+            }, this.COOLDOWN_SECS * 1000);
+        },
+
+        // ─────────────────────────────────────────
+        // 3. ESCANEO
+        // ─────────────────────────────────────────
+        simularEscaneo() {
+            if (!this.inputManual.trim()) return;
+            this.onScanSuccess(this.inputManual.trim());
+            this.inputManual = '';
+        },
+
+        async onScanSuccess(codigo) {
+            // Bloquear si está en cooldown (excepto comandos manuales de botones)
+            const esComandoManual = ['CMD_SURTIDO','CMD_VACIO'].includes(codigo.toUpperCase());
+            if (this.cooldownActive && !esComandoManual) return;
+
+            // Pausar cámara para no leer dobles
+            if (this.html5QrcodeScanner) {
+                try { await this.html5QrcodeScanner.pause(); } catch(e) {}
+            }
+
+            this.playSound('beep');
+            this.startCooldown();
+
+            if (!this.vale) {
+                await this.lookupVale(codigo);
+            } else {
+                if (this.context === 'entrada')      await this.confirmarEntrada(codigo);
+                else if (this.context === 'salida')  await this.procesarComando(codigo);
+            }
+
+            // Reanudar cámara tras cooldown
+            if (this.html5QrcodeScanner) {
+                try { await this.html5QrcodeScanner.resume(); } catch(e) {}
+            }
+        },
+
+        // ─────────────────────────────────────────
+        // 4. BACKEND
+        // ─────────────────────────────────────────
+        async lookupVale(codigo) {
+            try {
+                const res  = await this._post('/operations/lookup', { code: codigo });
+                const data = await res.json();
+
+                if (!res.ok || data.status !== 'success') {
+                    return this.alertError(data?.message ?? `Error del servidor (${res.status})`);
+                }
+
+                this.vale    = data.data;
+                this.context = data.context;
+                this.mensajeGuia = this.context === 'entrada' ? 'Escanea QR de la unidad' : 'Confirma la salida';
+
+            } catch (e) {
+                this.alertError('Sin conexión. Verifica tu red e intenta de nuevo.');
+            }
+        },
+
+        async confirmarEntrada(qrUnidad) {
+            const uuid = this.limpiarCodigo(qrUnidad);
+            await this.enviarServidor('confirmar_entrada', uuid);
+        },
+
+        async procesarComando(codigo) {
+            const cmd = codigo.toUpperCase();
+            if (cmd.includes('SURTIDO'))     await this.enviarServidor('salida_surtido');
+            else if (cmd.includes('VACIO'))  await this.enviarServidor('salida_vacio');
+            else this.alertError('Código inválido. Usa los botones Surtido / Vacío.');
+        },
+
+        async enviarServidor(accion, unitCode = null) {
+            try {
+                const res  = await this._post('/operations/register', { vale_id: this.vale.id, accion, unit_code: unitCode });
+                const data = await res.json();
+
+                if (!res.ok || data.status !== 'success') {
+                    return this.alertError(data?.message ?? `Error del servidor (${res.status})`);
+                }
+
+                this.playSound('success');
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Listo!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    background: '#f0fdf4',
+                    iconColor: '#16a34a',
+                    customClass: { popup: 'rounded-2xl shadow-xl' }
+                });
+                this.resetTodo();
+
+            } catch (e) {
+                this.alertError('Sin conexión. No se pudo guardar el registro.');
+            }
+        },
+
+        // ─────────────────────────────────────────
+        // 5. UTILIDADES
+        // ─────────────────────────────────────────
+        _post(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(body)
+            });
+        },
+
+        limpiarCodigo(codigo) {
+            if (!codigo) return '';
+            if (codigo.includes('http') || codigo.includes('/')) {
+                const partes = codigo.split('/');
+                return partes[partes.length - 1];
+            }
+            return codigo;
+        },
+
+        resetTodo() {
+            this.vale    = null;
+            this.context = 'inicio';
+            this.mensajeGuia = 'Escanea el vale';
+            this.inputManual = '';
+        },
+
+        // Todos los errores pasan por aquí
+        alertError(msg) {
+            this.playSound('error');
+            return Swal.fire({
+                icon: 'error',
+                title: 'Atención',
+                text: msg,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#2563eb',
+                customClass: { popup: 'rounded-2xl shadow-xl', confirmButton: 'rounded-xl' }
+            });
+        },
+
+        playSound(type) {
+            const srcs = {
+                beep:    'https://www.soundjay.com/button/beep-07.mp3',
+                success: 'https://www.soundjay.com/misc/sounds/magic-chime-01.mp3',
+                error:   'https://www.soundjay.com/button/button-10.mp3'
+            };
+            const a = new Audio(srcs[type]);
+            a.play().catch(() => {});
         }
     }
+}
 </script>
 </body>
 </html>

@@ -11,6 +11,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ValeController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\OperationsController;
 
 /*
@@ -65,6 +66,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/materials/{material}/history', [MaterialController::class, 'history'])->name('materials.history');
         Route::resource('materials', MaterialController::class);
     });
+
+    Route::middleware(['auth'])->group(function () {
+    // Agrega esta línea
+    Route::get('/buscar', [SearchController::class, 'globalSearch'])->name('search.global');
+    }); 
 
     // Agregamos middleware a Unidades/Camiones
     Route::middleware('permission:manage units')->controller(UnitController::class)->prefix('units')->name('units.')->group(function () {

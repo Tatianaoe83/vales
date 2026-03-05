@@ -5,10 +5,15 @@
                 Dashboard
             </h2>
             <div class="relative hidden md:block">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </span>
-                <input type="text" class="w-64 py-2 pl-10 pr-4 bg-gray-100 border-none rounded-lg text-sm focus:ring-0" placeholder="Buscar por folio, cliente...">
+                {{-- Formulario de búsqueda global --}}
+                <form action="{{ route('search.global') }}" method="GET">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                    <input type="text" name="query" value="{{ request('query') }}" 
+                           class="w-64 py-2 pl-10 pr-4 bg-gray-100 border-none rounded-lg text-sm focus:ring-0" 
+                           placeholder="Buscar por folio, cliente, rol..." required>
+                </form>
             </div>
         </div>
     </x-slot>

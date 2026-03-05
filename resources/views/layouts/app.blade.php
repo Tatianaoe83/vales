@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Vales Agregados') }}</title>
+
+    <link rel="icon" type="image/png" href="{{ asset('img/vale-regalo.png') }}">
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -90,10 +100,11 @@
                          x-show="sidebarOpen || isMobile"
                          onerror="this.style.display='none'">
                     {{-- Ícono fallback cuando el sidebar está colapsado en desktop --}}
-                    <div class="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center shrink-0"
-                         x-show="!sidebarOpen && !isMobile">
-                        <i class="fas fa-file-alt text-white text-sm"></i>
-                    </div>
+                    <img src="{{ asset('img/logo-solo.png') }}" 
+                    alt="Icono Vales"
+                    class="w-8 h-8 object-contain shrink-0 mx-auto"
+                    x-show="!sidebarOpen && !isMobile"
+                    onerror="this.style.display='none'">
                 </div>
 
                 {{-- Desktop toggle --}}

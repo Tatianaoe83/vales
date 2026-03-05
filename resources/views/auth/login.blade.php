@@ -213,7 +213,7 @@
                 </form>
 
                 <div class="mt-10 pt-6 border-t border-gray-100 text-center text-xs text-gray-300 font-medium">
-                    &copy; {{ date('Y') }} AgregadosSys · Todos los derechos reservados
+                    &copy; {{ date('Y') }} Vales Agregados · Todos los derechos reservados
                 </div>
             </div>
         </div>
