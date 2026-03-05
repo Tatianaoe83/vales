@@ -77,7 +77,7 @@
                                     </td>
 
                                     <td class="px-6 py-4 text-right">
-                                        <div class="flex justify-end items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                                        <div class="flex justify-end items-center gap-2 transition-opacity duration-200">
                                             
                                             <a href="{{ route('units.gafete', $unit->uuid) }}" target="_blank" 
                                                class="p-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50 transition shadow-sm" 

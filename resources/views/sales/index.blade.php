@@ -5,211 +5,370 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-50">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <div class="flex justify-between mb-4">
-                
-                <form action="{{ route('sales.index') }}" method="GET" class="flex gap-2">
-                    <input type="text" name="search" placeholder="Buscar folio o cliente..." value="{{ request('search') }}" class="rounded-lg border-gray-300 text-sm w-64 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">Buscar</button>
+    <div class="py-6 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- ── Toolbar ── --}}
+            <div class="flex flex-col sm:flex-row gap-3 mb-5">
+
+                {{-- Búsqueda --}}
+                <form action="{{ route('sales.index') }}" method="GET" class="flex gap-2 flex-1">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400 text-xs"></i>
+                        </div>
+                        <input type="text" name="search"
+                               placeholder="Buscar folio o cliente..."
+                               value="{{ request('search') }}"
+                               class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    <button type="submit"
+                            class="bg-gray-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-700 transition shadow-sm shrink-0">
+                        Buscar
+                    </button>
                     @if(request('search'))
-                        <a href="{{ route('sales.index') }}" class="text-gray-500 text-sm flex items-center hover:text-red-500">Limpiar</a>
+                        <a href="{{ route('sales.index') }}"
+                           class="text-gray-400 text-sm flex items-center hover:text-red-500 transition shrink-0">
+                            <i class="fas fa-times"></i>
+                        </a>
                     @endif
                 </form>
 
-                <div class="flex gap-2">
-                    <a href="{{ route('vales.export', 'xlsx') }}" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-green-700 shadow flex items-center gap-2 transition" title="Descargar Reporte Excel">
-                        <i class="fas fa-file-excel"></i> Excel
+                {{-- Acciones --}}
+                <div class="flex gap-2 shrink-0">
+                    <a href="{{ route('vales.export', 'xlsx') }}"
+                       class="flex items-center gap-1.5 bg-green-600 text-white px-3 py-2.5 rounded-xl text-xs font-black hover:bg-green-700 shadow-sm transition">
+                        <i class="fas fa-file-excel"></i>
+                        <span class="hidden sm:inline">Excel</span>
                     </a>
-                    
-                    <a href="{{ route('vales.export', 'csv') }}" class="bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-700 shadow flex items-center gap-2 transition" title="Descargar CSV">
-                        <i class="fas fa-file-csv"></i> CSV
+                    <a href="{{ route('vales.export', 'csv') }}"
+                       class="flex items-center gap-1.5 bg-gray-600 text-white px-3 py-2.5 rounded-xl text-xs font-black hover:bg-gray-700 shadow-sm transition">
+                        <i class="fas fa-file-csv"></i>
+                        <span class="hidden sm:inline">CSV</span>
                     </a>
-
-                    <a href="{{ route('sales.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow flex items-center gap-2 transition ml-2">
-                        <i class="fas fa-plus"></i> Nueva Venta
+                    <a href="{{ route('sales.create') }}"
+                       class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-black hover:bg-blue-700 shadow-sm transition">
+                        <i class="fas fa-plus"></i>
+                        <span>Nueva Venta</span>
                     </a>
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    
-                    <table class="min-w-full text-left text-sm">
-                        <thead class="bg-gray-100 text-gray-600 uppercase font-bold">
-                            <tr>
-                                <th class="px-4 py-3"></th> 
-                                <th class="px-4 py-3">Folio Venta</th>
-                                <th class="px-4 py-3">Cliente</th>
-                                <th class="px-4 py-3">Fecha</th>
-                                <th class="px-4 py-3 text-center">Logística</th>
-                                <th class="px-4 py-3 text-right">Total</th>
-                                <th class="px-4 py-3 text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        
-                        @foreach($sales as $sale)
-                        <tbody x-data="{ open: false }" class="border-b border-gray-100 hover:bg-gray-50 transition">
-                            
-                            <tr class="cursor-pointer group" @click="open = !open">
-                                <td class="px-4 py-4 text-gray-400">
-                                    <i class="fas fa-chevron-right transition-transform duration-200 group-hover:text-blue-400" :class="{'rotate-90 text-blue-600': open}"></i>
-                                </td>
-                                <td class="px-4 py-4 font-bold text-gray-800">
-                                    {{ $sale->folio }}
-                                    @if($sale->tipo_venta == 'Credito')
-                                        <span class="ml-2 text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full border border-purple-200">Crédito</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4">{{ $sale->client->name }}</td>
-                                <td class="px-4 py-4 text-gray-500">{{ $sale->created_at->format('d/m/Y') }}</td>
-                                <td class="px-4 py-4 text-center">
-                                    <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs font-bold shadow-sm">
-                                        {{ $sale->vales->count() }} Viajes/Vales
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-right font-bold text-gray-900">${{ number_format($sale->total, 2) }}</td>
-                                
-                                <td class="px-4 py-4 text-center">
-                                    <div class="flex justify-center gap-3">
-                                        <a href="{{ route('sales.pdf', $sale->id) }}" target="_blank" @click.stop class="text-red-500 hover:text-red-700 transition" title="Ver PDF">
-                                            <i class="fas fa-file-pdf fa-lg"></i>
-                                        </a>
-                                        
-                                        <a href="{{ route('sales.email', $sale->id) }}" 
-                                           @click.stop="enviarCorreo($event)"
-                                           class="text-blue-500 hover:text-blue-700 transition" 
-                                           title="Enviar Correo al Cliente">
-                                            <i class="fas fa-envelope fa-lg"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
+            {{-- ════════════════════════════════════
+                 DESKTOP: tabla (md+)
+            ════════════════════════════════════ --}}
+            <div class="hidden md:block bg-white shadow-sm rounded-2xl border border-gray-100 overflow-hidden">
+                <table class="min-w-full text-left text-sm">
+                    <thead class="bg-gray-50 border-b border-gray-100">
+                        <tr class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            <th class="px-5 py-4 w-8"></th>
+                            <th class="px-5 py-4">Folio</th>
+                            <th class="px-5 py-4">Cliente</th>
+                            <th class="px-5 py-4">Fecha</th>
+                            <th class="px-5 py-4 text-center">Logística</th>
+                            <th class="px-5 py-4 text-right">Total</th>
+                            <th class="px-5 py-4 text-center">Acciones</th>
+                        </tr>
+                    </thead>
 
-                            <tr x-show="open" x-transition.opacity class="bg-gray-50 shadow-inner">
-                                <td colspan="7" class="p-4 pl-12 border-l-4 border-blue-500">
-                                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                                        <h4 class="text-xs font-bold text-gray-400 uppercase mb-3 border-b pb-2 flex justify-between items-center">
-                                            <span>Desglose de Logística ({{ $sale->vales->count() }} unidades)</span>
-                                            <span class="text-[10px] font-normal text-gray-400">Gestione el flujo de cada camión aquí</span>
-                                        </h4>
-                                        
-                                        <table class="w-full text-xs">
-                                            <thead>
-                                                <tr class="text-gray-500 border-b bg-gray-50">
-                                                    <th class="py-2 px-2 text-left">Folio Vale</th>
-                                                    <th class="py-2 px-2 text-left">Material</th>
-                                                    <th class="py-2 px-2 text-center">Carga</th>
-                                                    <th class="py-2 px-2 text-left">Unidad</th>
-                                                    <th class="py-2 px-2 text-center">Estatus Actual</th>
-                                                    <th class="py-2 px-2 text-center">Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($sale->vales as $vale)
-                                                <tr class="border-b last:border-0 hover:bg-blue-50 transition">
-                                                    <td class="py-3 px-2 font-mono font-bold text-blue-600">{{ $vale->folio_vale }}</td>
-                                                    <td class="py-3 px-2">{{ $vale->material->name }}</td>
-                                                    <td class="py-3 px-2 text-center font-bold">{{ $vale->cantidad }} {{ $vale->material->unit }}</td>
-                                                    <td class="py-3 px-2">
-                                                        @if($vale->unit)
-                                                            <div class="flex items-center gap-1">
-                                                                <i class="fas fa-truck text-gray-400"></i> 
-                                                                <span class="font-semibold">{{ $vale->unit->placa }}</span>
-                                                            </div>
-                                                        @else
-                                                            <span class="text-gray-400 italic">Unidad Externa</span>
-                                                        @endif
-                                                    </td>
-                                                    <td class="py-3 px-2 text-center">
-                                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold border
-                                                            {{ $vale->estatus == 'Vigente' ? 'bg-green-50 text-green-700 border-green-200' : '' }}
-                                                            {{ $vale->estatus == 'En Planta' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : '' }}
-                                                            {{ $vale->estatus == 'Surtido' ? 'bg-blue-50 text-blue-700 border-blue-200' : '' }}
-                                                            {{ $vale->estatus == 'Vencido' ? 'bg-orange-100 text-orange-800 border-orange-200' : '' }}
-                                                            {{ $vale->estatus == 'Cancelado' ? 'bg-red-50 text-red-700 border-red-200' : '' }}">
-                                                            {{ $vale->estatus }}
-                                                        </span>
-                                                    </td>
-                                                    
-                                                    <td class="py-3 px-2 text-center flex items-center justify-center gap-2">
-                                                        
-                                                        {{-- 1. Si está VIGENTE -> Dar Entrada --}}
+                    @foreach($sales as $sale)
+                    <tbody x-data="{ open: false }" class="border-b border-gray-50 last:border-0">
+                        <tr class="cursor-pointer group hover:bg-blue-50/40 transition-colors" @click="open = !open">
+                            <td class="px-5 py-4">
+                                <div class="w-6 h-6 flex items-center justify-center rounded-lg transition-all duration-200"
+                                     :class="open ? 'bg-blue-600 text-white rotate-90' : 'bg-gray-100 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-500'">
+                                    <i class="fas fa-chevron-right text-[10px] transition-transform duration-200"></i>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4">
+                                <p class="font-black text-gray-800 text-sm font-mono">{{ $sale->folio }}</p>
+                                @if($sale->tipo_venta == 'Credito')
+                                    <span class="text-[9px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-black border border-purple-200">Crédito</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4">
+                                <p class="font-semibold text-gray-700 text-sm">{{ $sale->client->name }}</p>
+                            </td>
+                            <td class="px-5 py-4 text-gray-400 text-xs font-medium">
+                                {{ $sale->created_at->format('d/m/Y') }}
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-100 py-1 px-3 rounded-full text-[11px] font-black">
+                                    <i class="fas fa-truck text-[9px]"></i>
+                                    {{ $sale->vales->count() }} vales
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                <p class="font-black text-gray-800">${{ number_format($sale->total, 2) }}</p>
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <div class="flex justify-center items-center gap-3">
+                                    <a href="{{ route('sales.pdf', $sale->id) }}" target="_blank" @click.stop
+                                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition" title="PDF">
+                                        <i class="fas fa-file-pdf text-sm"></i>
+                                    </a>
+                                    <a href="{{ route('sales.email', $sale->id) }}" @click.stop="enviarCorreo($event)"
+                                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition" title="Correo">
+                                        <i class="fas fa-envelope text-sm"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Detalle vales desktop --}}
+                        <tr x-show="open" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0">
+                            <td colspan="7" class="px-5 pb-4 pt-0 bg-blue-50/30">
+                                <div class="bg-white rounded-xl border border-blue-100 overflow-hidden shadow-sm ml-8">
+                                    <table class="w-full text-xs">
+                                        <thead class="bg-gray-50 border-b border-gray-100">
+                                            <tr class="text-[10px] font-black text-gray-400 uppercase tracking-wider">
+                                                <th class="py-2.5 px-4 text-left">Folio Vale</th>
+                                                <th class="py-2.5 px-4 text-left">Material</th>
+                                                <th class="py-2.5 px-4 text-center">Carga</th>
+                                                <th class="py-2.5 px-4 text-left">Unidad</th>
+                                                <th class="py-2.5 px-4 text-center">Estatus</th>
+                                                <th class="py-2.5 px-4 text-center">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($sale->vales as $vale)
+                                            <tr class="border-b last:border-0 hover:bg-blue-50/40 transition-colors">
+                                                <td class="py-3 px-4 font-mono font-black text-blue-600 text-xs">{{ $vale->folio_vale }}</td>
+                                                <td class="py-3 px-4 text-gray-700 font-semibold">{{ $vale->material->name }}</td>
+                                                <td class="py-3 px-4 text-center font-black text-gray-800">
+                                                    {{ $vale->cantidad }} {{ $vale->material->unit }}
+                                                </td>
+                                                <td class="py-3 px-4">
+                                                    @if($vale->unit)
+                                                        <div class="flex items-center gap-1.5">
+                                                            <i class="fas fa-truck text-gray-400 text-[10px]"></i>
+                                                            <span class="font-semibold text-gray-700">{{ $vale->unit->placa }}</span>
+                                                        </div>
+                                                    @else
+                                                        <span class="text-gray-400 italic">Unidad Externa</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3 px-4 text-center">
+                                                    <span class="inline-block px-2 py-1 rounded-full text-[10px] font-black border
+                                                        {{ $vale->estatus == 'Vigente'   ? 'bg-green-50 text-green-700 border-green-200' : '' }}
+                                                        {{ $vale->estatus == 'En Planta' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : '' }}
+                                                        {{ $vale->estatus == 'Surtido'   ? 'bg-blue-50 text-blue-700 border-blue-200' : '' }}
+                                                        {{ $vale->estatus == 'Vencido'   ? 'bg-orange-100 text-orange-800 border-orange-200' : '' }}
+                                                        {{ $vale->estatus == 'Cancelado' ? 'bg-red-50 text-red-700 border-red-200' : '' }}">
+                                                        {{ $vale->estatus }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 px-4 text-center">
+                                                    <div class="flex items-center justify-center gap-2">
                                                         @if($vale->estatus == 'Vigente')
-                                                            <form action="{{ route('vales.status', $vale->id) }}" method="POST" class="inline">
+                                                            <form action="{{ route('vales.status', $vale->id) }}" method="POST">
                                                                 @csrf
                                                                 <input type="hidden" name="estatus" value="En Planta">
-                                                                <button type="submit" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded-md shadow-sm text-[10px] font-bold transition flex items-center gap-1 border border-yellow-200">
+                                                                <button type="submit" class="flex items-center gap-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-2.5 py-1 rounded-lg text-[10px] font-black transition border border-yellow-200">
                                                                     <i class="fas fa-sign-in-alt"></i> Entrada
                                                                 </button>
                                                             </form>
-
-                                                        {{-- 2. Si está EN PLANTA -> Surtir --}}
                                                         @elseif($vale->estatus == 'En Planta')
-                                                            <form action="{{ route('vales.status', $vale->id) }}" method="POST" class="inline">
+                                                            <form action="{{ route('vales.status', $vale->id) }}" method="POST">
                                                                 @csrf
                                                                 <input type="hidden" name="estatus" value="Surtido">
-                                                                <button type="submit" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-md shadow-sm text-[10px] font-bold transition flex items-center gap-1 border border-blue-200">
+                                                                <button type="submit" class="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-800 px-2.5 py-1 rounded-lg text-[10px] font-black transition border border-blue-200">
                                                                     <i class="fas fa-check"></i> Surtir
                                                                 </button>
                                                             </form>
-
-                                                        {{-- 3. Si está VENCIDO -> RESTABLECER --}}
                                                         @elseif($vale->estatus == 'Vencido')
-                                                            <form action="{{ route('vales.restore', $vale->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Confirmas reactivar este vale? Se extenderá la vigencia 15 días.')">
+                                                            <form action="{{ route('vales.restore', $vale->id) }}" method="POST"
+                                                                  onsubmit="return confirm('¿Confirmas reactivar este vale?')">
                                                                 @csrf
-                                                                <button type="submit" class="bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded-md shadow-sm text-[10px] font-bold transition flex items-center gap-1 border border-green-200">
+                                                                <button type="submit" class="flex items-center gap-1 bg-green-100 hover:bg-green-200 text-green-800 px-2.5 py-1 rounded-lg text-[10px] font-black transition border border-green-200">
                                                                     <i class="fas fa-redo-alt"></i> Restablecer
                                                                 </button>
                                                             </form>
                                                         @endif
-
-                                                        <button type="button" onclick="verHistorial({{ $vale->id }}, '{{ $vale->folio_vale }}')" 
-                                                                class="text-gray-400 hover:text-blue-600 transition p-1" 
-                                                                title="Ver Historial de Movimientos">
-                                                            <i class="fas fa-history"></i>
+                                                        <button type="button"
+                                                                onclick="verHistorial({{ $vale->id }}, '{{ $vale->folio_vale }}')"
+                                                                class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-blue-600 transition">
+                                                            <i class="fas fa-history text-xs"></i>
                                                         </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    @endforeach
+                </table>
 
-                                                    </td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
-
-                        </tbody>
-                        @endforeach
-                    </table>
-
-                    <div class="mt-4">
-                        {{ $sales->links() }}
-                    </div>
-
+                <div class="px-5 py-4 border-t border-gray-100 bg-gray-50">
+                    {{ $sales->links() }}
                 </div>
             </div>
+
+            {{-- ════════════════════════════════════
+                 MOBILE: tarjetas (< md)
+            ════════════════════════════════════ --}}
+            <div class="md:hidden space-y-3">
+                @foreach($sales as $sale)
+                <div x-data="{ open: false }"
+                     class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+                    {{-- Tarjeta cabecera --}}
+                    <div class="p-4 cursor-pointer" @click="open = !open">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <p class="font-black text-gray-800 font-mono text-sm truncate">{{ $sale->folio }}</p>
+                                    @if($sale->tipo_venta == 'Credito')
+                                        <span class="shrink-0 text-[9px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-black border border-purple-200">Crédito</span>
+                                    @endif
+                                </div>
+                                <p class="text-sm text-gray-600 font-semibold truncate">{{ $sale->client->name }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $sale->created_at->format('d/m/Y') }}</p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <p class="font-black text-gray-800 text-base">${{ number_format($sale->total, 2) }}</p>
+                                <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-100 py-0.5 px-2 rounded-full text-[10px] font-black mt-1">
+                                    <i class="fas fa-truck text-[8px]"></i>
+                                    {{ $sale->vales->count() }} vales
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Footer tarjeta --}}
+                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('sales.pdf', $sale->id) }}" target="_blank" @click.stop
+                                   class="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-black hover:bg-red-100 transition">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a>
+                                <a href="{{ route('sales.email', $sale->id) }}" @click.stop="enviarCorreo($event)"
+                                   class="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-black hover:bg-blue-100 transition">
+                                    <i class="fas fa-envelope"></i> Correo
+                                </a>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs font-bold transition"
+                                 :class="open ? 'text-blue-600' : 'text-gray-400'">
+                                <span x-text="open ? 'Ocultar' : 'Ver vales'"></span>
+                                <i class="fas fa-chevron-down text-[10px] transition-transform duration-200"
+                                   :class="open ? 'rotate-180' : ''"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Vales en mobile --}}
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="border-t border-gray-100 bg-gray-50/50 divide-y divide-gray-100">
+
+                        @foreach($sale->vales as $vale)
+                        <div class="p-4">
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div>
+                                    <p class="font-black text-blue-600 font-mono text-xs">{{ $vale->folio_vale }}</p>
+                                    <p class="text-sm font-semibold text-gray-700 mt-0.5">{{ $vale->material->name }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        {{ $vale->cantidad }} {{ $vale->material->unit }}
+                                        @if($vale->unit)
+                                            · <i class="fas fa-truck"></i> {{ $vale->unit->placa }}
+                                        @else
+                                            · <span class="italic">Unidad Externa</span>
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="inline-block px-2 py-1 rounded-full text-[10px] font-black border
+                                        {{ $vale->estatus == 'Vigente'   ? 'bg-green-50 text-green-700 border-green-200' : '' }}
+                                        {{ $vale->estatus == 'En Planta' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : '' }}
+                                        {{ $vale->estatus == 'Surtido'   ? 'bg-blue-50 text-blue-700 border-blue-200' : '' }}
+                                        {{ $vale->estatus == 'Vencido'   ? 'bg-orange-100 text-orange-800 border-orange-200' : '' }}
+                                        {{ $vale->estatus == 'Cancelado' ? 'bg-red-50 text-red-700 border-red-200' : '' }}">
+                                        {{ $vale->estatus }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Acciones vale mobile --}}
+                            <div class="flex items-center gap-2">
+                                @if($vale->estatus == 'Vigente')
+                                    <form action="{{ route('vales.status', $vale->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="estatus" value="En Planta">
+                                        <button type="submit"
+                                                class="flex items-center gap-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1.5 rounded-lg text-xs font-black transition border border-yellow-200">
+                                            <i class="fas fa-sign-in-alt"></i> Entrada
+                                        </button>
+                                    </form>
+                                @elseif($vale->estatus == 'En Planta')
+                                    <form action="{{ route('vales.status', $vale->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="estatus" value="Surtido">
+                                        <button type="submit"
+                                                class="flex items-center gap-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1.5 rounded-lg text-xs font-black transition border border-blue-200">
+                                            <i class="fas fa-check"></i> Surtir
+                                        </button>
+                                    </form>
+                                @elseif($vale->estatus == 'Vencido')
+                                    <form action="{{ route('vales.restore', $vale->id) }}" method="POST" class="inline"
+                                          onsubmit="return confirm('¿Confirmas reactivar este vale?')">
+                                        @csrf
+                                        <button type="submit"
+                                                class="flex items-center gap-1.5 bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1.5 rounded-lg text-xs font-black transition border border-green-200">
+                                            <i class="fas fa-redo-alt"></i> Restablecer
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <button type="button"
+                                        onclick="verHistorial({{ $vale->id }}, '{{ $vale->folio_vale }}')"
+                                        class="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-black transition">
+                                    <i class="fas fa-history"></i> Historial
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endforeach
+
+                <div class="py-2">
+                    {{ $sales->links() }}
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 m-4">
-            
-            <div class="bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+    {{-- ── Modal Historial ── --}}
+    <div id="historyModal"
+         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 hidden backdrop-blur-sm"
+         onclick="if(event.target===this) closeHistory()">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden">
+
+            <div class="flex items-start justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800">Historial de Movimientos</h3>
-                    <p class="text-xs text-gray-500 font-mono" id="modalFolio">Folio: ---</p>
+                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-0.5">Bitácora de movimientos</p>
+                    <p class="text-sm font-black text-gray-800 font-mono" id="modalFolio">—</p>
                 </div>
-                <button onclick="closeHistory()" class="text-gray-400 hover:text-red-500 transition">
-                    <i class="fas fa-times text-xl"></i>
+                <button onclick="closeHistory()"
+                        class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-200 hover:bg-red-100 hover:text-red-500 text-gray-500 transition">
+                    <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
 
-            <div class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50" id="historyContent">
-                <div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+            <div class="p-5 max-h-[60dvh] overflow-y-auto bg-gray-50" id="historyContent">
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-circle-notch fa-spin text-2xl"></i>
+                    <p class="mt-2 text-xs">Cargando...</p>
+                </div>
             </div>
-
         </div>
     </div>
 
@@ -221,61 +380,49 @@
                 icon: 'info',
                 showConfirmButton: false,
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading()
-                }
+                didOpen: () => Swal.showLoading()
             });
         }
 
         function verHistorial(id, folio) {
             document.getElementById('historyModal').classList.remove('hidden');
-            document.getElementById('modalFolio').innerText = 'Folio: ' + folio;
-            
-            const container = document.getElementById('historyContent');
-            container.innerHTML = '<div class="text-center py-10 text-gray-400"><i class="fas fa-circle-notch fa-spin text-3xl"></i><p class="mt-2 text-xs">Consultando bitácora...</p></div>';
+            document.getElementById('modalFolio').innerText = folio;
+            const c = document.getElementById('historyContent');
+            c.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i><p class="mt-2 text-xs">Consultando bitácora...</p></div>';
 
             fetch(`/vales/${id}/history`)
-                .then(res => res.json())
+                .then(r => r.json())
                 .then(data => {
-                    if(data.length === 0) {
-                        container.innerHTML = '<p class="text-center text-gray-400">Sin movimientos registrados.</p>';
+                    if (!data.length) {
+                        c.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">Sin movimientos registrados.</p>';
                         return;
                     }
-
-                    let html = '<div class="relative border-l-2 border-gray-200 ml-3 space-y-6">';
-                    
+                    const colors = {
+                        'Vigente': 'bg-green-500', 'En Planta': 'bg-yellow-500',
+                        'Surtido': 'bg-blue-600',  'Vencido': 'bg-orange-500', 'Cancelado': 'bg-red-500'
+                    };
+                    let html = '<div class="relative border-l-2 border-gray-200 ml-3 space-y-4">';
                     data.forEach(item => {
-                        const fecha = new Date(item.created_at).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit' });
-                        
-                        let color = 'bg-gray-200';
-                        if(item.estatus_nuevo === 'Vigente') color = 'bg-green-500';
-                        if(item.estatus_nuevo === 'En Planta') color = 'bg-yellow-500';
-                        if(item.estatus_nuevo === 'Surtido') color = 'bg-blue-600';
-                        if(item.estatus_nuevo === 'Vencido') color = 'bg-orange-500';
-                        if(item.estatus_nuevo === 'Cancelado') color = 'bg-red-500';
-
+                        const fecha = new Date(item.created_at).toLocaleString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+                        const dot   = colors[item.estatus_nuevo] || 'bg-gray-300';
                         html += `
-                        <div class="relative pl-8">
-                            <span class="absolute -left-[9px] top-1 h-5 w-5 rounded-full border-4 border-white ${color}"></span>
-                            <div class="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                                <div class="flex justify-between items-start">
-                                    <span class="font-bold text-xs uppercase text-gray-700">${item.estatus_nuevo}</span>
-                                    <span class="text-[10px] text-gray-400">${fecha}</span>
+                        <div class="relative pl-7">
+                            <span class="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-4 border-white ${dot}"></span>
+                            <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                                <div class="flex justify-between items-start gap-2">
+                                    <span class="font-black text-xs uppercase text-gray-700">${item.estatus_nuevo}</span>
+                                    <span class="text-[10px] text-gray-400 shrink-0">${fecha}</span>
                                 </div>
-                                <p class="text-sm text-gray-700 font-medium mt-1">${item.comentarios || 'Sin comentarios'}</p>
+                                <p class="text-sm text-gray-700 mt-1">${item.comentarios || 'Sin comentarios'}</p>
                                 <p class="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
                                     <i class="fas fa-user-circle"></i> ${item.user ? item.user.name : 'Sistema'}
                                 </p>
                             </div>
                         </div>`;
                     });
-
-                    html += '</div>';
-                    container.innerHTML = html;
+                    c.innerHTML = html + '</div>';
                 })
-                .catch(err => {
-                    container.innerHTML = '<p class="text-center text-red-400">Error al cargar historial.</p>';
-                });
+                .catch(() => { c.innerHTML = '<p class="text-center text-red-400 text-sm py-8">Error al cargar historial.</p>'; });
         }
 
         function closeHistory() {

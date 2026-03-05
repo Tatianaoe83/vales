@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Vales Agregados — Kiosco</title>
+    <title>Vales Agregados - Ranking</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
@@ -12,7 +12,6 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%); }
 
         /* ── Animations ── */
-        @keyframes spin-slow  { to { transform: rotate(360deg); } }
         @keyframes pulse-glow { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:.8;transform:scale(1.1)} }
         @keyframes float      { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         @keyframes fade-up    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
@@ -20,11 +19,52 @@
         @keyframes sheet-up   { from{transform:translateY(100%)} to{transform:translateY(0)} }
         @keyframes fade-in    { from{opacity:0} to{opacity:1} }
 
-        .spin    { animation: spin-slow 9s linear infinite; }
+        /* Logo: respira suavemente sin rotar */
+        @keyframes logo-breathe {
+            0%,100% { transform: scale(1);    box-shadow: 0 8px 40px rgba(59,130,246,.15); }
+            50%      { transform: scale(1.04); box-shadow: 0 16px 56px rgba(59,130,246,.28); }
+        }
+        /* Anillo exterior girando MUY lento (solo el anillo, no el logo) */
+        @keyframes ring-spin {
+            to { transform: rotate(360deg); }
+        }
+
         .pulse   { animation: pulse-glow 2.8s ease-in-out infinite; }
         .float   { animation: float 3.5s ease-in-out infinite; }
         .fade-up { animation: fade-up .45s ease forwards; opacity: 0; }
         .pop     { animation: pop-in .4s cubic-bezier(.34,1.56,.64,1) forwards; opacity: 0; }
+
+        .logo-card {
+                    animation: logo-breathe 3.8s ease-in-out infinite;
+                    width: 5rem;
+                    height: 5rem;
+                    border-radius: 20px;
+                    background: #fff;
+                    box-shadow: 0 8px 40px rgba(59,130,246,.18);
+                    border: 1px solid rgba(219,234,254,.8);
+                    display: flex; align-items: center; justify-content: center;
+                    overflow: hidden;
+                    padding: 12px;
+                }
+                .logo-card img { 
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain; 
+                }
+        .ring-outer {
+            position: absolute;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            border: 2px dashed rgba(147,197,253,.55);
+            animation: ring-spin 18s linear infinite;
+        }
+        .ring-inner {
+            position: absolute;
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            border: 2px dashed rgba(165,180,252,.4);
+            animation: ring-spin 12s linear infinite reverse;
+        }
 
         .face-btn { cursor: pointer; transition: transform .15s cubic-bezier(.34,1.56,.64,1); }
         .face-btn:active { transform: scale(.8) !important; }
@@ -75,19 +115,21 @@
          PANTALLA 1 — REPOSO
     ══════════════════════════════════════ --}}
     <div id="s-sleep" class="screen on flex-col items-center justify-center gap-6 p-8 text-center">
-        <div class="relative flex items-center justify-center">
+
+        {{-- Logo con anillos giratorios --}}
+        <div class="relative flex items-center justify-center" style="width:200px;height:200px;">
+            {{-- Pulsos de fondo --}}
             <div class="pulse absolute rounded-full bg-blue-100"  style="width:200px;height:200px;"></div>
-            <div class="pulse absolute rounded-full bg-blue-200" style="width:150px;height:150px;animation-delay:.7s;"></div>
-            <div class="float" style="width:110px;height:110px;">
-                <div class="spin w-full h-full rounded-[28px] bg-white shadow-2xl border border-blue-100 flex items-center justify-center">
-                    {{-- <img src="{{ asset('img/logo.png') }}" class="w-16 h-16 object-contain"> --}}
-                    <svg style="width:52px;height:52px;" class="text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
+            <div class="pulse absolute rounded-full bg-blue-200"  style="width:150px;height:150px;animation-delay:.7s;"></div>
+            {{-- Anillos que giran (sin tocar el logo) --}}
+            <div class="ring-outer"></div>
+            <div class="ring-inner"></div>
+            {{-- Logo estático / respirando --}}
+            <div class="logo-card relative z-10">
+                <img src="{{ asset('img/logo-solo.png') }}" alt="Logo">
             </div>
         </div>
+
         <div>
             <h1 class="text-2xl font-black text-gray-800 tracking-tight">Vales Agregados</h1>
             <p class="text-gray-400 text-sm mt-1">Gracias por su preferencia</p>
@@ -439,7 +481,6 @@
             el.classList.toggle('off', s !== id);
             el.classList.toggle('on',  s === id);
         });
-        // Re-trigger animations
         document.querySelectorAll(`#${id} .fade-up, #${id} .pop`).forEach(el => {
             el.style.opacity = '0'; el.style.animation = 'none';
             requestAnimationFrame(() => { el.style.animation = ''; });
@@ -487,7 +528,6 @@
         document.getElementById('d-tipo').textContent     = d.tipo_venta === 'Credito' ? '📋 Crédito 15d' : '💳 Contado';
         document.getElementById('d-desc').textContent     = d.descuento && parseFloat(d.descuento) > 0 ? '-$'+d.descuento : '$0.00';
 
-        // Materiales
         const mEl = document.getElementById('d-mats');
         mEl.innerHTML = '';
         (d.materials_detail || []).forEach(m => {
@@ -509,7 +549,6 @@
         });
         if (!mEl.innerHTML) mEl.innerHTML = `<p class="text-xs text-center text-gray-300 font-black py-3">Sin materiales</p>`;
 
-        // Vales
         const vEl = document.getElementById('d-vales');
         vEl.innerHTML = '';
         (d.vales_detail || []).forEach((v, i) => {
@@ -558,12 +597,10 @@
     function timerUI(s) {
         const c = s <= 20 ? '#ef4444' : '#3b82f6';
         const off = 113 - (113 * s / 120);
-        // Portrait timer
         const tc = document.getElementById('tc');
         const tt = document.getElementById('tt');
         if (tc) { tc.style.strokeDashoffset = off; tc.style.stroke = c; }
         if (tt) { tt.textContent = s; tt.style.color = c; }
-        // Landscape timer
         const tc2 = document.getElementById('tc2');
         const tt2 = document.getElementById('tt2');
         const tt2l = document.getElementById('tt2-label');
