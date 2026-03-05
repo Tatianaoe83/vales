@@ -127,8 +127,11 @@
                                     <div class="md:col-span-2 space-y-1.5">
                                         <label class="block text-[10px] text-gray-500 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:500;">Cantidad</label>
                                         <div class="relative">
-                                            <input type="number" step="1" min="0" x-model.number="draft.cantidad" placeholder="0"
+                                            {{-- ✅ FIX: bloqueo de negativos, signos y decimales en cantidad --}}
+                                            <input type="number" step="1" min="1" x-model.number="draft.cantidad" placeholder="0"
                                                    @keydown="if(['.','e','-','+'].includes($event.key)) $event.preventDefault()"
+                                                   @input="if(parseFloat($el.value) < 1 || isNaN(parseFloat($el.value))) $el.value = 1; draft.cantidad = parseInt($el.value)"
+                                                   @paste="$event.preventDefault()"
                                                    class="w-full border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 rounded-xl text-sm text-center pr-7 transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;">
                                             <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-blue-300 pointer-events-none" style="font-family:'Inter',sans-serif;font-weight:800;" x-text="draft.unitLabel"></span>
                                         </div>
@@ -144,8 +147,15 @@
                                     <div class="md:col-span-2 space-y-1.5">
                                         <label class="block text-[10px] text-gray-500 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:500;">Desc. %</label>
                                         <div class="relative">
+                                            {{-- ✅ FIX: bloqueo de negativos y signos en descuento, límite 0–100 --}}
                                             <input type="number" step="1" min="0" max="100" x-model="draft.descuentoPorcentaje" placeholder="0"
-                                                   @change="if(parseFloat($el.value)>100) $el.value=100; if(parseFloat($el.value)<0) $el.value=0;"
+                                                   @keydown="if(['-','+','e','.'].includes($event.key)) $event.preventDefault()"
+                                                   @input="
+                                                       let v = parseInt($el.value);
+                                                       if (isNaN(v) || v < 0) { $el.value = 0; draft.descuentoPorcentaje = 0; }
+                                                       else if (v > 100)      { $el.value = 100; draft.descuentoPorcentaje = 100; }
+                                                   "
+                                                   @paste="$event.preventDefault()"
                                                    class="w-full border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 rounded-xl text-sm text-center transition-colors pr-6" style="font-family:'Inter',sans-serif;font-weight:400;">
                                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-300" style="font-family:'Inter',sans-serif;font-weight:800;">%</span>
                                         </div>
@@ -348,8 +358,11 @@
                                                     <p class="text-[11px] text-gray-700 truncate mb-1.5" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="trip.name"></p>
                                                     <div class="flex items-center gap-2">
                                                         <span class="text-[9px] text-gray-400 uppercase tracking-wide shrink-0" style="font-family:'Inter',sans-serif;font-weight:700;">Carga:</span>
-                                                        <input type="number" step="0.01" x-model="trip.amount"
-                                                               @input="validateTripLimit(trip)"
+                                                        {{-- ✅ FIX: bloqueo de negativos y signos en carga de viaje --}}
+                                                        <input type="number" step="0.01" min="0.01" x-model="trip.amount"
+                                                               @keydown="if(['-','+','e'].includes($event.key)) $event.preventDefault()"
+                                                               @input="if(parseFloat($el.value) <= 0 || isNaN(parseFloat($el.value))) $el.value = 0.01; validateTripLimit(trip)"
+                                                               @paste="$event.preventDefault()"
                                                                :readonly="mode === 'auto'"
                                                                :class="mode === 'auto'
                                                                    ? 'bg-transparent border-transparent text-blue-600 cursor-default'
@@ -604,6 +617,9 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
 
         confirmDraft() {
             if (!this.draft.material_id || parseFloat(this.draft.cantidad) <= 0) return;
+            // ✅ FIX: sanear valores antes de confirmar
+            this.draft.cantidad           = Math.max(1, parseInt(this.draft.cantidad) || 1);
+            this.draft.descuentoPorcentaje = Math.min(100, Math.max(0, parseInt(this.draft.descuentoPorcentaje) || 0));
             this.confirmedLines.push({...this.draft});
             this.draft = { material_id:'', cantidad:0, precio:0, descuentoPorcentaje:0, unitLabel:'' };
             const sel = document.getElementById('activeMaterialSelect');
@@ -646,13 +662,19 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
         },
 
         addTrip(id, name, cap) {
+            // ✅ FIX: garantizar que amount nunca sea negativo
             let amt = cap > 0 ? Math.min(cap, this.remaining) : this.remaining;
-            this.trips.push({ unit_id:id, name, amount:Math.round(amt*100)/100 });
+            amt = Math.max(0, parseFloat(amt.toFixed(2)));
+            this.trips.push({ unit_id:id, name, amount:amt });
         },
         removeTrip(idx) { this.trips.splice(idx, 1); },
 
         validateTripLimit(trip) {
             if (this.mode === 'auto') return;
+            // ✅ FIX: no permitir valores negativos o cero
+            if (parseFloat(trip.amount) <= 0 || isNaN(parseFloat(trip.amount))) {
+                trip.amount = 0.01;
+            }
             const unit = this.allUnits.find(u => u.id == trip.unit_id);
             if (!unit) return;
             const max = parseFloat(unit.capacidad_maxima);
@@ -685,5 +707,10 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
     .custom-scrollbar::-webkit-scrollbar       { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 20px; }
+
+    /* ✅ FIX: ocultar flechas nativas de inputs numéricos en Chrome/Safari/Firefox */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
 </style>
 </x-app-layout>

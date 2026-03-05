@@ -1,159 +1,352 @@
 <x-app-layout>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-bold text-2xl text-gray-800 leading-tight">
+            <h2 class="text-2xl text-gray-800 leading-tight" style="font-family:'Inter',sans-serif;font-weight:800;">
                 Dashboard
             </h2>
             <div class="relative hidden md:block">
-                {{-- Formulario de búsqueda global --}}
                 <form action="{{ route('search.global') }}" method="GET">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
                     </span>
-                    <input type="text" name="query" value="{{ request('query') }}" 
-                           class="w-64 py-2 pl-10 pr-4 bg-gray-100 border-none rounded-lg text-sm focus:ring-0" 
+                    <input type="text" name="query" value="{{ request('query') }}"
+                           class="w-64 py-2 pl-10 pr-4 bg-gray-100 border-none rounded-lg text-sm focus:ring-0"
+                           style="font-family:'Inter',sans-serif;"
                            placeholder="Buscar por folio, cliente, rol..." required>
                 </form>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Total Vales Activos</p>
-                    <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ $totalValesActivos }}</p>
-                    <p class="text-xs font-bold text-green-500 mt-2 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                        +5.2% <span class="text-gray-400 ml-1 font-normal">vs mes anterior</span>
+    <div class="py-8 bg-gray-50 min-h-screen" style="font-family:'Inter',sans-serif;">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            {{-- ── KPI CARDS ── --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+                {{-- Vales Activos --}}
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Vales Activos</p>
+                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-3xl text-gray-800" style="font-weight:800;">{{ $totalValesActivos }}</p>
+                    <p class="text-[11px] text-green-500 mt-2 flex items-center gap-1" style="font-weight:600;">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +5.2% <span class="text-gray-300 ml-1" style="font-weight:400;">vs mes anterior</span>
                     </p>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Ventas del Día</p>
-                    <p class="text-3xl font-extrabold text-gray-800 mt-2">${{ number_format($ventasHoy, 2) }}</p>
-                    <p class="text-xs font-bold text-red-500 mt-2 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                        -1.8% <span class="text-gray-400 ml-1 font-normal">vs ayer</span>
+                {{-- Ventas del Día --}}
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Ventas del Día</p>
+                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-3xl text-gray-800" style="font-weight:800;">${{ number_format($ventasHoy, 2) }}</p>
+                    <p class="text-[11px] text-red-400 mt-2 flex items-center gap-1" style="font-weight:600;">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        -1.8% <span class="text-gray-300 ml-1" style="font-weight:400;">vs ayer</span>
                     </p>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Entregas Pendientes</p>
-                    <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ $entregasPendientes }}</p>
-                    <p class="text-xs font-bold text-green-500 mt-2 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                        +2.0% <span class="text-gray-400 ml-1 font-normal">flujo normal</span>
+                {{-- Entregas Pendientes --}}
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Entregas Pendientes</p>
+                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-3xl text-gray-800" style="font-weight:800;">{{ $entregasPendientes }}</p>
+                    <p class="text-[11px] text-green-500 mt-2 flex items-center gap-1" style="font-weight:600;">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +2.0% <span class="text-gray-300 ml-1" style="font-weight:400;">flujo normal</span>
                     </p>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Nuevos Clientes (Mes)</p>
-                    <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ $nuevosClientes }}</p>
-                    <p class="text-xs font-bold text-green-500 mt-2 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                        +10.0% <span class="text-gray-400 ml-1 font-normal">crecimiento</span>
+                {{-- Nuevos Clientes --}}
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Nuevos Clientes</p>
+                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-3xl text-gray-800" style="font-weight:800;">{{ $nuevosClientes }}</p>
+                    <p class="text-[11px] text-green-500 mt-2 flex items-center gap-1" style="font-weight:600;">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +10.0% <span class="text-gray-300 ml-1" style="font-weight:400;">crecimiento</span>
                     </p>
                 </div>
+
+                {{-- ── Calificación Promedio (card azul sólida) ── --}}
+                <div class="bg-blue-600 p-5 rounded-2xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    {{-- Decoración círculos sutiles --}}
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/40 rounded-full pointer-events-none"></div>
+                    <div class="absolute -right-2 bottom-2 w-14 h-14 bg-blue-500/25 rounded-full pointer-events-none"></div>
+
+                    <div class="flex items-center justify-between mb-3 relative z-10">
+                        <p class="text-[10px] text-blue-200 uppercase tracking-widest" style="font-weight:700;">Satisfacción</p>
+                        <div class="w-8 h-8 bg-white/15 rounded-xl flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10">
+                        <div class="flex items-end gap-1.5 mb-2">
+                            <p class="text-4xl text-white leading-none" style="font-weight:900;">
+                                {{ number_format($promedioCalificacion ?? 0, 1) }}
+                            </p>
+                            <span class="text-blue-300 text-sm mb-1" style="font-weight:600;">/ 5.0</span>
+                        </div>
+
+                        <div class="w-full bg-blue-500/50 rounded-full h-1.5 mb-2.5 overflow-hidden">
+                            <div class="h-1.5 bg-white rounded-full"
+                                 id="kpiRatingBar"
+                                 style="width:0%; transition: width 1.2s cubic-bezier(.4,0,.2,1);"
+                                 data-width="{{ (($promedioCalificacion ?? 0) / 5) * 100 }}%">
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-blue-200" style="font-weight:500;">
+                            <span class="text-white" style="font-weight:700;">{{ $totalCalificaciones ?? 0 }}</span> esta semana
+                        </p>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
-                <h3 class="text-lg font-bold text-gray-800">Accesos Rápidos</h3>
+            {{-- ── ACCESOS RÁPIDOS ── --}}
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:800;">Accesos Rápidos</h3>
                 <div class="flex gap-3">
-                    <a href="{{ route('clients.index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-bold shadow-sm transition">
+                    <a href="{{ route('clients.index') }}"
+                       class="px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 rounded-xl text-sm transition shadow-sm"
+                       style="font-weight:600;">
                         Administrar Clientes
                     </a>
-                    <a href="{{ route('sales.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <a href="{{ route('sales.create') }}"
+                       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm shadow-md transition flex items-center gap-2"
+                       style="font-weight:700;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
                         Crear Nuevo Vale
                     </a>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
+            {{-- ── GRÁFICA + ACTIVIDAD ── --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
                 <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="text-base font-bold text-gray-800 mb-6">Ventas por Día (Últimos 7 Días)</h4>
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="text-sm text-gray-800 uppercase tracking-wide" style="font-weight:700;">Ventas por Día — Últimos 7 días</h4>
+                        <span class="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full" style="font-weight:700;">Esta semana</span>
+                    </div>
                     <div class="h-64">
                         <canvas id="salesChart"></canvas>
                     </div>
                 </div>
 
                 <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="text-base font-bold text-gray-800 mb-6">Actividad Reciente</h4>
-                    
-                    <div class="space-y-6">
+                    <h4 class="text-sm text-gray-800 uppercase tracking-wide mb-5" style="font-weight:700;">Actividad Reciente</h4>
+                    <div class="space-y-4">
                         @forelse($actividadReciente as $history)
-                        <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center 
-                                {{ $history->estatus_nuevo == 'Vigente' ? 'bg-blue-100 text-blue-500' : '' }}
-                                {{ $history->estatus_nuevo == 'Surtido' ? 'bg-green-100 text-green-500' : '' }}
-                                {{ $history->estatus_nuevo == 'Cancelado' ? 'bg-red-100 text-red-500' : '' }}
-                                {{ $history->estatus_nuevo == 'En Planta' ? 'bg-yellow-100 text-yellow-600' : '' }}">
-                                
-                                @if($history->estatus_nuevo == 'Vigente') <i class="fas fa-ticket-alt text-xs"></i> @endif
-                                @if($history->estatus_nuevo == 'Surtido') <i class="fas fa-check text-xs"></i> @endif
-                                @if($history->estatus_nuevo == 'En Planta') <i class="fas fa-truck text-xs"></i> @endif
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-[10px]
+                                {{ $history->estatus_nuevo == 'Vigente'   ? 'bg-blue-100 text-blue-500'    : '' }}
+                                {{ $history->estatus_nuevo == 'Surtido'   ? 'bg-green-100 text-green-500'  : '' }}
+                                {{ $history->estatus_nuevo == 'Cancelado' ? 'bg-red-100 text-red-500'      : '' }}
+                                {{ $history->estatus_nuevo == 'En Planta' ? 'bg-indigo-100 text-indigo-500': '' }}">
+                                @if($history->estatus_nuevo == 'Vigente')   <i class="fas fa-ticket-alt"></i> @endif
+                                @if($history->estatus_nuevo == 'Surtido')   <i class="fas fa-check"></i>      @endif
+                                @if($history->estatus_nuevo == 'En Planta') <i class="fas fa-truck"></i>      @endif
+                                @if($history->estatus_nuevo == 'Cancelado') <i class="fas fa-times"></i>      @endif
                             </div>
-                            
-                            <div class="flex-1">
-                                <p class="text-sm font-bold text-gray-800">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-gray-700 truncate" style="font-weight:700;">
                                     {{ $history->estatus_nuevo == 'Vigente' ? 'Vale creado' : $history->estatus_nuevo }}
-                                    <span class="text-gray-500 font-normal">#{{ $history->vale->folio_vale }}</span>
+                                    <span class="text-gray-400" style="font-weight:400;">#{{ $history->vale->folio_vale }}</span>
                                 </p>
-                                <p class="text-xs text-gray-500 mt-0.5">
-                                    Cliente: {{ Str::limit($history->vale->sale->client->name ?? 'N/A', 20) }}
+                                <p class="text-[11px] text-gray-400 mt-0.5" style="font-weight:400;">
+                                    {{ Str::limit($history->vale->sale->client->name ?? 'N/A', 22) }}
                                 </p>
                             </div>
-                            <span class="text-xs text-gray-400 whitespace-nowrap">
+                            <span class="text-[10px] text-gray-300 whitespace-nowrap mt-0.5" style="font-weight:500;">
                                 {{ $history->created_at->diffForHumans() }}
                             </span>
                         </div>
                         @empty
-                        <p class="text-sm text-gray-400 text-center py-4">No hay actividad reciente.</p>
+                        <p class="text-xs text-gray-300 text-center py-6" style="font-weight:500;">Sin actividad reciente.</p>
                         @endforelse
                     </div>
                 </div>
 
             </div>
+
+            {{-- ── WIDGET CALIFICACIONES ── --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+                <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-sm text-gray-800 uppercase tracking-wide" style="font-weight:700;">Satisfacción del Cliente</h4>
+                    </div>
+                    <span class="text-[10px] text-gray-400 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full" style="font-weight:700;">
+                        {{ $totalCalificaciones ?? 0 }} evaluaciones esta semana
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-50">
+
+                    {{-- Anillo + badge ── --}}
+                    <div class="flex flex-col items-center justify-center px-8 py-8">
+                        <div class="relative w-32 h-32 mb-5">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#EFF6FF" stroke-width="9"/>
+                                <circle cx="50" cy="50" r="38" fill="none"
+                                        stroke="#2563EB"
+                                        stroke-width="9"
+                                        stroke-linecap="round"
+                                        stroke-dasharray="238.76"
+                                        stroke-dashoffset="{{ 238.76 - (238.76 * (($promedioCalificacion ?? 0) / 5)) }}"
+                                        style="transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-3xl text-blue-600 leading-none" style="font-weight:900;">
+                                    {{ number_format($promedioCalificacion ?? 0, 1) }}
+                                </span>
+                                <span class="text-[10px] text-gray-300 mt-0.5" style="font-weight:700;">DE 5.0</span>
+                            </div>
+                        </div>
+
+                        @php
+                            $avg = $promedioCalificacion ?? 0;
+                            [$label, $labelColor, $labelBg] = match(true) {
+                                $avg >= 4.5 => ['Excelente',  'text-blue-600',   'bg-blue-50 border-blue-200'],
+                                $avg >= 3.5 => ['Bueno',      'text-green-600',  'bg-green-50 border-green-200'],
+                                $avg >= 2.5 => ['Regular',    'text-gray-500',   'bg-gray-50 border-gray-200'],
+                                $avg >= 1.5 => ['Deficiente', 'text-orange-500', 'bg-orange-50 border-orange-200'],
+                                default     => ['Crítico',    'text-red-500',    'bg-red-50 border-red-200'],
+                            };
+                        @endphp
+                        <span class="text-xs px-3 py-1 rounded-full border {{ $labelColor }} {{ $labelBg }}" style="font-weight:700;">
+                            {{ $label }}
+                        </span>
+                        <p class="text-[11px] text-gray-300 mt-2" style="font-weight:400;">Promedio esta semana</p>
+                    </div>
+
+                    {{-- Barras de distribución ── --}}
+                    <div class="px-8 py-8 md:col-span-2 flex flex-col justify-center">
+                        <p class="text-[10px] text-gray-300 uppercase tracking-widest mb-5" style="font-weight:800;">Distribución de Respuestas</p>
+
+                        @php
+                            $distribucion = $distribucionCalificaciones ?? [5=>0,4=>0,3=>0,2=>0,1=>0];
+                            $totalResp    = array_sum($distribucion) ?: 1;
+                            $barColors    = [5=>'bg-blue-600', 4=>'bg-blue-400', 3=>'bg-blue-200', 2=>'bg-gray-200', 1=>'bg-gray-200'];
+                            $numColors    = [5=>'text-blue-700', 4=>'text-blue-500', 3=>'text-blue-400', 2=>'text-gray-400', 1=>'text-gray-400'];
+                        @endphp
+
+                        <div class="space-y-3.5">
+                            @foreach([5,4,3,2,1] as $star)
+                            @php
+                                $count = $distribucion[$star] ?? 0;
+                                $pct   = round(($count / $totalResp) * 100);
+                            @endphp
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs w-4 text-right shrink-0 {{ $numColors[$star] }}" style="font-weight:800;">{{ $star }}</span>
+
+                                <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                                    <div class="h-2 rounded-full rating-bar {{ $barColors[$star] }}"
+                                         style="width:0%; transition: width 1.1s cubic-bezier(.4,0,.2,1);"
+                                         data-width="{{ $pct }}%">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 w-24 shrink-0">
+                                    <span class="text-xs text-gray-700" style="font-weight:700;">{{ $count }}</span>
+                                    <span class="text-[10px] text-gray-300" style="font-weight:400;">resp.</span>
+                                    <span class="text-[10px] text-gray-400 ml-auto" style="font-weight:600;">{{ $pct }}%</span>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <script>
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: @json($chartLabels),
-                datasets: [{
-                    label: 'Ventas ($)',
-                    data: @json($chartData),
-                    backgroundColor: '#3B82F6', // Azul Tailwind
-                    borderRadius: 6,
-                    barThickness: 30,
-                }]
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('salesChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: @json($chartLabels),
+        datasets: [{
+            label: 'Ventas ($)',
+            data: @json($chartData),
+            backgroundColor: '#2563EB',
+            hoverBackgroundColor: '#1D4ED8',
+            borderRadius: 6,
+            barThickness: 28,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#F3F4F6', borderDash: [3,3] },
+                ticks: { color: '#9CA3AF', font: { family:'Inter', size:11, weight:'600' } }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { borderDash: [2, 2] }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                }
+            x: {
+                grid: { display: false },
+                ticks: { color: '#9CA3AF', font: { family:'Inter', size:11, weight:'600' } }
             }
-        });
-    </script>
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const kpi = document.getElementById('kpiRatingBar');
+        if (kpi) kpi.style.width = kpi.dataset.width;
+        document.querySelectorAll('.rating-bar').forEach(b => b.style.width = b.dataset.width);
+    }, 250);
+});
+</script>
+
+<style>* { font-family: 'Inter', sans-serif; }</style>
 </x-app-layout>
