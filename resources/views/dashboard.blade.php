@@ -1,8 +1,11 @@
 <x-app-layout>
+
+@push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+@endpush
 
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -35,8 +38,8 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Vales Activos</p>
-                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:#eef1f8;">
+                            <svg class="w-4 h-4" style="color:#121f48;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
                         </div>
@@ -52,8 +55,8 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Ventas del Día</p>
-                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:#eef1f8;">
+                            <svg class="w-4 h-4" style="color:#121f48;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
@@ -69,8 +72,8 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Entregas Pendientes</p>
-                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:#eef1f8;">
+                            <svg class="w-4 h-4" style="color:#121f48;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                             </svg>
                         </div>
@@ -86,8 +89,8 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-weight:700;">Nuevos Clientes</p>
-                        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:#eef1f8;">
+                            <svg class="w-4 h-4" style="color:#121f48;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
                         </div>
@@ -99,15 +102,14 @@
                     </p>
                 </div>
 
-                {{-- ── Calificación Promedio (card azul sólida) ── --}}
-                <div class="bg-blue-600 p-5 rounded-2xl shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    {{-- Decoración círculos sutiles --}}
-                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/40 rounded-full pointer-events-none"></div>
-                    <div class="absolute -right-2 bottom-2 w-14 h-14 bg-blue-500/25 rounded-full pointer-events-none"></div>
+                {{-- Satisfacción KPI --}}
+                <div class="p-5 rounded-2xl shadow-sm flex flex-col justify-between relative overflow-hidden" style="background:#121f48;">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full pointer-events-none" style="background:rgba(255,255,255,.06);"></div>
+                    <div class="absolute -right-2 bottom-2 w-14 h-14 rounded-full pointer-events-none" style="background:rgba(255,255,255,.04);"></div>
 
                     <div class="flex items-center justify-between mb-3 relative z-10">
-                        <p class="text-[10px] text-blue-200 uppercase tracking-widest" style="font-weight:700;">Satisfacción</p>
-                        <div class="w-8 h-8 bg-white/15 rounded-xl flex items-center justify-center">
+                        <p class="text-[10px] uppercase tracking-widest" style="font-weight:700; color:rgba(255,255,255,.5);">Satisfacción</p>
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.12);">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -115,22 +117,35 @@
                     </div>
 
                     <div class="relative z-10">
-                        <div class="flex items-end gap-1.5 mb-2">
-                            <p class="text-4xl text-white leading-none" style="font-weight:900;">
-                                {{ number_format($promedioCalificacion ?? 0, 1) }}
-                            </p>
-                            <span class="text-blue-300 text-sm mb-1" style="font-weight:600;">/ 5.0</span>
-                        </div>
-
-                        <div class="w-full bg-blue-500/50 rounded-full h-1.5 mb-2.5 overflow-hidden">
-                            <div class="h-1.5 bg-white rounded-full"
-                                 id="kpiRatingBar"
-                                 style="width:0%; transition: width 1.2s cubic-bezier(.4,0,.2,1);"
-                                 data-width="{{ (($promedioCalificacion ?? 0) / 5) * 100 }}%">
+                        {{-- Carita según promedio --}}
+                        @php
+                            $avg = $promedioCalificacion ?? 0;
+                            $kpiFace = match(true) {
+                                $avg >= 4.0 => '🤩',
+                                $avg >= 2.0 => '😐',
+                                $avg >  0   => '😞',
+                                default     => '—',
+                            };
+                        @endphp
+                        <div class="flex items-end gap-2 mb-2">
+                            <span class="text-3xl leading-none">{{ $kpiFace }}</span>
+                            <div class="flex items-end gap-1 mb-0.5">
+                                <p class="text-2xl text-white leading-none" style="font-weight:900;">
+                                    {{ number_format($avg, 1) }}
+                                </p>
+                                <span class="text-sm mb-0.5" style="color:rgba(255,255,255,.45); font-weight:600;">/ 5</span>
                             </div>
                         </div>
 
-                        <p class="text-[10px] text-blue-200" style="font-weight:500;">
+                        <div class="w-full rounded-full h-1.5 mb-2.5 overflow-hidden" style="background:rgba(255,255,255,.15);">
+                            <div class="h-1.5 bg-white rounded-full"
+                                 id="kpiRatingBar"
+                                 style="width:0%; transition: width 1.2s cubic-bezier(.4,0,.2,1);"
+                                 data-width="{{ ($avg / 5) * 100 }}%">
+                            </div>
+                        </div>
+
+                        <p class="text-[10px]" style="font-weight:500; color:rgba(255,255,255,.5);">
                             <span class="text-white" style="font-weight:700;">{{ $totalCalificaciones ?? 0 }}</span> esta semana
                         </p>
                     </div>
@@ -148,8 +163,9 @@
                         Administrar Clientes
                     </a>
                     <a href="{{ route('sales.create') }}"
-                       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm shadow-md transition flex items-center gap-2"
-                       style="font-weight:700;">
+                       class="px-4 py-2 text-white rounded-xl text-sm shadow-md transition flex items-center gap-2"
+                       style="font-weight:700; background:#121f48;"
+                       onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -164,7 +180,7 @@
                 <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-6">
                         <h4 class="text-sm text-gray-800 uppercase tracking-wide" style="font-weight:700;">Ventas por Día — Últimos 7 días</h4>
-                        <span class="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full" style="font-weight:700;">Esta semana</span>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full border" style="font-weight:700; color:#121f48; background:#eef1f8; border-color:#c8cedf;">Esta semana</span>
                     </div>
                     <div class="h-64">
                         <canvas id="salesChart"></canvas>
@@ -207,12 +223,12 @@
 
             </div>
 
-            {{-- ── WIDGET CALIFICACIONES ── --}}
+            {{-- ── WIDGET CALIFICACIONES (3 caritas) ── --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
                 <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                        <div class="w-7 h-7 rounded-xl flex items-center justify-center shrink-0" style="background:#121f48;">
                             <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -226,13 +242,13 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-50">
 
-                    {{-- Anillo + badge ── --}}
+                    {{-- Anillo central --}}
                     <div class="flex flex-col items-center justify-center px-8 py-8">
                         <div class="relative w-32 h-32 mb-5">
                             <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#EFF6FF" stroke-width="9"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#eef1f8" stroke-width="9"/>
                                 <circle cx="50" cy="50" r="38" fill="none"
-                                        stroke="#2563EB"
+                                        stroke="#121f48"
                                         stroke-width="9"
                                         stroke-linecap="round"
                                         stroke-dasharray="238.76"
@@ -240,7 +256,7 @@
                                         style="transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);"/>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-3xl text-blue-600 leading-none" style="font-weight:900;">
+                                <span class="text-3xl leading-none" style="font-weight:900; color:#121f48;">
                                     {{ number_format($promedioCalificacion ?? 0, 1) }}
                                 </span>
                                 <span class="text-[10px] text-gray-300 mt-0.5" style="font-weight:700;">DE 5.0</span>
@@ -249,51 +265,62 @@
 
                         @php
                             $avg = $promedioCalificacion ?? 0;
-                            [$label, $labelColor, $labelBg] = match(true) {
-                                $avg >= 4.5 => ['Excelente',  'text-blue-600',   'bg-blue-50 border-blue-200'],
-                                $avg >= 3.5 => ['Bueno',      'text-green-600',  'bg-green-50 border-green-200'],
-                                $avg >= 2.5 => ['Regular',    'text-gray-500',   'bg-gray-50 border-gray-200'],
-                                $avg >= 1.5 => ['Deficiente', 'text-orange-500', 'bg-orange-50 border-orange-200'],
-                                default     => ['Crítico',    'text-red-500',    'bg-red-50 border-red-200'],
+                            [$wLabel, $wFace, $wColor, $wBg, $wBorder] = match(true) {
+                                $avg >= 4.0 => ['¡Genial!',  '🤩', '#16a34a', '#f0fdf4', '#bbf7d0'],
+                                $avg >= 2.0 => ['Regular',   '😐', '#d97706', '#fffbeb', '#fde68a'],
+                                $avg >  0   => ['Malo',      '😞', '#ef4444', '#fef2f2', '#fecaca'],
+                                default     => ['Sin datos', '—',  '#9ca3af', '#f9fafb', '#e5e7eb'],
                             };
                         @endphp
-                        <span class="text-xs px-3 py-1 rounded-full border {{ $labelColor }} {{ $labelBg }}" style="font-weight:700;">
-                            {{ $label }}
+                        <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border" style="font-weight:700; color:{{ $wColor }}; background:{{ $wBg }}; border-color:{{ $wBorder }};">
+                            <span>{{ $wFace }}</span> {{ $wLabel }}
                         </span>
                         <p class="text-[11px] text-gray-300 mt-2" style="font-weight:400;">Promedio esta semana</p>
                     </div>
 
-                    {{-- Barras de distribución ── --}}
+                    {{-- Barras de 3 caritas --}}
                     <div class="px-8 py-8 md:col-span-2 flex flex-col justify-center">
-                        <p class="text-[10px] text-gray-300 uppercase tracking-widest mb-5" style="font-weight:800;">Distribución de Respuestas</p>
+                        <p class="text-[10px] text-gray-300 uppercase tracking-widest mb-6" style="font-weight:800;">Distribución de Respuestas</p>
 
                         @php
-                            $distribucion = $distribucionCalificaciones ?? [5=>0,4=>0,3=>0,2=>0,1=>0];
-                            $totalResp    = array_sum($distribucion) ?: 1;
-                            $barColors    = [5=>'bg-blue-600', 4=>'bg-blue-400', 3=>'bg-blue-200', 2=>'bg-gray-200', 1=>'bg-gray-200'];
-                            $numColors    = [5=>'text-blue-700', 4=>'text-blue-500', 3=>'text-blue-400', 2=>'text-gray-400', 1=>'text-gray-400'];
+                            // Sistema de 3 calificaciones: 1=Malo, 3=Regular, 5=Genial
+                            $distribucion = $distribucionCalificaciones ?? [];
+                            $malo    = ($distribucion[1] ?? 0);
+                            $regular = ($distribucion[3] ?? 0);
+                            $genial  = ($distribucion[5] ?? 0);
+                            $totalResp = max($malo + $regular + $genial, 1);
+
+                            $faces = [
+                                ['face'=>'🤩', 'label'=>'¡Genial!', 'count'=>$genial,  'color'=>'#16a34a', 'bar'=>'#16a34a', 'bg'=>'#f0fdf4'],
+                                ['face'=>'😐', 'label'=>'Regular',  'count'=>$regular, 'color'=>'#d97706', 'bar'=>'#d97706', 'bg'=>'#fffbeb'],
+                                ['face'=>'😞', 'label'=>'Malo',     'count'=>$malo,    'color'=>'#ef4444', 'bar'=>'#ef4444', 'bg'=>'#fef2f2'],
+                            ];
                         @endphp
 
-                        <div class="space-y-3.5">
-                            @foreach([5,4,3,2,1] as $star)
-                            @php
-                                $count = $distribucion[$star] ?? 0;
-                                $pct   = round(($count / $totalResp) * 100);
-                            @endphp
+                        <div class="space-y-5">
+                            @foreach($faces as $f)
+                            @php $pct = round(($f['count'] / $totalResp) * 100); @endphp
                             <div class="flex items-center gap-4">
-                                <span class="text-xs w-4 text-right shrink-0 {{ $numColors[$star] }}" style="font-weight:800;">{{ $star }}</span>
 
-                                <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                                    <div class="h-2 rounded-full rating-bar {{ $barColors[$star] }}"
-                                         style="width:0%; transition: width 1.1s cubic-bezier(.4,0,.2,1);"
+                                {{-- Carita + etiqueta --}}
+                                <div class="flex items-center gap-2 w-24 shrink-0">
+                                    <span class="text-xl leading-none">{{ $f['face'] }}</span>
+                                    <span class="text-[10px] text-gray-500 truncate" style="font-weight:700;">{{ $f['label'] }}</span>
+                                </div>
+
+                                {{-- Barra --}}
+                                <div class="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                    <div class="h-2.5 rounded-full rating-bar"
+                                         style="width:0%; background:{{ $f['bar'] }}; transition: width 1.1s cubic-bezier(.4,0,.2,1);"
                                          data-width="{{ $pct }}%">
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-2 w-24 shrink-0">
-                                    <span class="text-xs text-gray-700" style="font-weight:700;">{{ $count }}</span>
-                                    <span class="text-[10px] text-gray-300" style="font-weight:400;">resp.</span>
-                                    <span class="text-[10px] text-gray-400 ml-auto" style="font-weight:600;">{{ $pct }}%</span>
+                                {{-- Números --}}
+                                <div class="flex items-center gap-2 w-20 shrink-0 justify-end">
+                                    <span class="text-xs text-gray-700" style="font-weight:700;">{{ $f['count'] }}</span>
+                                    <span class="text-[10px] text-gray-300">resp.</span>
+                                    <span class="text-[10px] ml-1" style="font-weight:600; color:{{ $f['color'] }};">{{ $pct }}%</span>
                                 </div>
                             </div>
                             @endforeach
@@ -315,8 +342,8 @@ new Chart(document.getElementById('salesChart').getContext('2d'), {
         datasets: [{
             label: 'Ventas ($)',
             data: @json($chartData),
-            backgroundColor: '#2563EB',
-            hoverBackgroundColor: '#1D4ED8',
+            backgroundColor: '#121f48',
+            hoverBackgroundColor: '#0d1633',
             borderRadius: 6,
             barThickness: 28,
         }]

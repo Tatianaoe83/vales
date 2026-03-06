@@ -1,8 +1,10 @@
-<x-app-layout>
-{{-- ── INTER FONT ── --}}
+﻿<x-app-layout>
+
+@push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@endpush
 
 <div class="pb-32 bg-gray-50 min-h-screen" x-data="salesWizard({{ $units }}, {{ $materials }})">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
@@ -11,19 +13,17 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-1">
-                    <div class="w-1 h-8 bg-blue-600 rounded-full"></div>
-                    {{-- Título Principal: ExtraBold --}}
+                    <div class="w-1 h-8 rounded-full brand-bg"></div>
                     <h1 class="text-2xl text-gray-900 tracking-tight" style="font-family:'Inter',sans-serif;font-weight:800;">Nueva Venta de Vales</h1>
                 </div>
-                {{-- Subtítulo: Regular --}}
                 <p class="text-gray-400 text-sm pl-4" style="font-family:'Inter',sans-serif;font-weight:400;">Logística automática basada en unidades del cliente</p>
             </div>
             <div class="flex items-center gap-3">
                 {{-- Indicadores de paso --}}
                 <div class="flex items-center gap-1.5 bg-white border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm">
                     <div class="flex items-center gap-1.5">
-                        <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white" style="font-family:'Inter',sans-serif;font-weight:800;">1</div>
-                        <span class="text-[11px] text-blue-600 hidden sm:block" style="font-family:'Inter',sans-serif;font-weight:700;">Cliente</span>
+                        <div class="w-6 h-6 rounded-full brand-bg flex items-center justify-center text-[10px] text-white" style="font-family:'Inter',sans-serif;font-weight:800;">1</div>
+                        <span class="text-[11px] brand-text hidden sm:block" style="font-family:'Inter',sans-serif;font-weight:700;">Cliente</span>
                     </div>
                     <div class="w-4 h-px bg-gray-200 mx-1"></div>
                     <div class="flex items-center gap-1.5">
@@ -42,7 +42,7 @@
                 </div>
                 <div class="bg-white border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm text-right">
                     <span class="block text-[9px] text-gray-300 uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:800;">Folio</span>
-                    <span class="text-base font-mono text-blue-600" style="font-family:'Inter',sans-serif;font-weight:800;">#VTA-NUEVA</span>
+                    <span class="text-base font-mono brand-text" style="font-family:'Inter',sans-serif;font-weight:800;">#VTA-NUEVA</span>
                 </div>
             </div>
         </div>
@@ -59,18 +59,15 @@
                     {{-- ── PASO 1: CLIENTE ── --}}
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-50 flex items-center gap-3">
-                            <div class="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center text-xs text-white shrink-0" style="font-family:'Inter',sans-serif;font-weight:800;">1</div>
-                            {{-- Título de paso: Bold --}}
+                            <div class="w-7 h-7 rounded-xl brand-bg flex items-center justify-center text-xs text-white shrink-0" style="font-family:'Inter',sans-serif;font-weight:800;">1</div>
                             <h3 class="text-sm text-gray-800 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:700;">Datos del Cliente</h3>
                         </div>
                         <div class="p-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div class="space-y-1.5">
-                                    {{-- Etiqueta: Medium --}}
                                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:500;">Cliente</label>
-                                    {{-- Input text: Regular --}}
                                     <select name="client_id" x-model="clientId" @change="onClientChange()" required
-                                            class="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-sm transition-colors bg-gray-50 focus:bg-white" style="font-family:'Inter',sans-serif;font-weight:400;">
+                                            class="w-full border-gray-200 focus:border-brand focus:ring-brand rounded-xl text-sm transition-colors bg-gray-50 focus:bg-white" style="font-family:'Inter',sans-serif;font-weight:400;">
                                         <option value="">Seleccionar cliente...</option>
                                         @foreach($clients as $client)
                                             <option value="{{ $client->id }}" data-rfc="{{ $client->rfc }}">{{ $client->name }}</option>
@@ -100,7 +97,7 @@
                                 <h3 class="text-sm text-gray-800 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:700;">Materiales a Facturar</h3>
                             </div>
                             <div x-show="confirmedLines.length > 0" x-transition
-                                 class="flex items-center gap-1.5 bg-blue-50 text-blue-600 text-[10px] px-3 py-1.5 rounded-full" style="font-family:'Inter',sans-serif;font-weight:800;">
+                                 class="flex items-center gap-1.5 brand-bg-soft brand-text text-[10px] px-3 py-1.5 rounded-full" style="font-family:'Inter',sans-serif;font-weight:800;">
                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                                 <span x-text="confirmedLines.length"></span> confirmado(s)
                             </div>
@@ -108,16 +105,15 @@
 
                         <div class="p-6 space-y-5">
                             {{-- Selector activo --}}
-                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
-                                <p class="text-[9px] text-blue-400 uppercase tracking-widest mb-4 flex items-center gap-2" style="font-family:'Inter',sans-serif;font-weight:800;">
-                                    <span class="w-3 h-px bg-blue-300 block"></span>Agregar material<span class="w-3 h-px bg-blue-300 block"></span>
+                            <div class="brand-bg-soft border brand-border rounded-2xl p-5" style="background:#eef1f8;">
+                                <p class="text-[9px] brand-text uppercase tracking-widest mb-4 flex items-center gap-2" style="font-family:'Inter',sans-serif;font-weight:800; opacity:.6;">
+                                    <span class="w-3 h-px brand-bg block"></span>Agregar material<span class="w-3 h-px brand-bg block"></span>
                                 </p>
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                                     <div class="md:col-span-4 space-y-1.5">
-                                        {{-- Etiqueta: Medium --}}
                                         <label class="block text-[10px] text-gray-500 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:500;">Material</label>
                                         <select id="activeMaterialSelect" x-model="draft.material_id" @change="onDraftMatChange()"
-                                                class="w-full border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 rounded-xl text-sm transition-colors" style="font-family:'Inter',sans-serif;font-weight:400;">
+                                                class="w-full brand-border bg-white focus:border-brand focus:ring-brand rounded-xl text-sm transition-colors" style="font-family:'Inter',sans-serif;font-weight:400;">
                                             <option value="">Seleccione...</option>
                                             @foreach($materials as $material)
                                                 <option value="{{ $material->id }}" data-price="{{ $material->price }}" data-unit="{{ $material->unit }}">{{ $material->name }}</option>
@@ -127,13 +123,12 @@
                                     <div class="md:col-span-2 space-y-1.5">
                                         <label class="block text-[10px] text-gray-500 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:500;">Cantidad</label>
                                         <div class="relative">
-                                            {{-- ✅ FIX: bloqueo de negativos, signos y decimales en cantidad --}}
                                             <input type="number" step="1" min="1" x-model.number="draft.cantidad" placeholder="0"
                                                    @keydown="if(['.','e','-','+'].includes($event.key)) $event.preventDefault()"
                                                    @input="if(parseFloat($el.value) < 1 || isNaN(parseFloat($el.value))) $el.value = 1; draft.cantidad = parseInt($el.value)"
                                                    @paste="$event.preventDefault()"
-                                                   class="w-full border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 rounded-xl text-sm text-center pr-7 transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;">
-                                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-blue-300 pointer-events-none" style="font-family:'Inter',sans-serif;font-weight:800;" x-text="draft.unitLabel"></span>
+                                                   class="w-full brand-border bg-white focus:border-brand focus:ring-brand rounded-xl text-sm text-center pr-7 transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;">
+                                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] brand-text pointer-events-none" style="font-family:'Inter',sans-serif;font-weight:800; opacity:.5;" x-text="draft.unitLabel"></span>
                                         </div>
                                     </div>
                                     <div class="md:col-span-2 space-y-1.5">
@@ -147,7 +142,6 @@
                                     <div class="md:col-span-2 space-y-1.5">
                                         <label class="block text-[10px] text-gray-500 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:500;">Desc. %</label>
                                         <div class="relative">
-                                            {{-- ✅ FIX: bloqueo de negativos y signos en descuento, límite 0–100 --}}
                                             <input type="number" step="1" min="0" max="100" x-model="draft.descuentoPorcentaje" placeholder="0"
                                                    @keydown="if(['-','+','e','.'].includes($event.key)) $event.preventDefault()"
                                                    @input="
@@ -156,17 +150,16 @@
                                                        else if (v > 100)      { $el.value = 100; draft.descuentoPorcentaje = 100; }
                                                    "
                                                    @paste="$event.preventDefault()"
-                                                   class="w-full border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 rounded-xl text-sm text-center transition-colors pr-6" style="font-family:'Inter',sans-serif;font-weight:400;">
+                                                   class="w-full brand-border bg-white focus:border-brand focus:ring-brand rounded-xl text-sm text-center transition-colors pr-6" style="font-family:'Inter',sans-serif;font-weight:400;">
                                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-300" style="font-family:'Inter',sans-serif;font-weight:800;">%</span>
                                         </div>
                                     </div>
                                     <div class="md:col-span-2">
-                                        {{-- Botón: SemiBold --}}
                                         <button type="button" @click="confirmDraft()"
                                                 :disabled="!draft.material_id || parseFloat(draft.cantidad) <= 0"
                                                 :class="(!draft.material_id || parseFloat(draft.cantidad) <= 0)
                                                     ? 'opacity-40 cursor-not-allowed bg-gray-300 text-gray-500'
-                                                    : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'"
+                                                    : 'brand-bg text-white hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'"
                                                 class="w-full flex items-center justify-center gap-2 text-xs py-2.5 px-4 rounded-xl transition-all duration-150 shadow-sm" style="font-family:'Inter',sans-serif;font-weight:600;">
                                             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -176,7 +169,7 @@
                                     </div>
                                 </div>
                                 <div class="mt-3 flex justify-end" x-show="draft.material_id && parseFloat(draft.cantidad) > 0" x-transition>
-                                    <span class="text-[11px] text-blue-500 bg-white border border-blue-100 px-3 py-1 rounded-full shadow-sm" style="font-family:'Inter',sans-serif;font-weight:700;">
+                                    <span class="text-[11px] brand-text bg-white brand-border px-3 py-1 rounded-full shadow-sm" style="font-family:'Inter',sans-serif;font-weight:700;">
                                         Subtotal: $<span x-text="draftSubtotal.toFixed(2)"></span>
                                     </span>
                                 </div>
@@ -186,15 +179,12 @@
                             <div x-show="confirmedLines.length > 0" x-transition>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                     <template x-for="(line, idx) in confirmedLines" :key="idx">
-                                        {{-- Card sin sobreposición: contenido a la izquierda, botones a la derecha en flujo normal --}}
                                         <div class="group flex items-stretch bg-gray-50 hover:bg-white border border-gray-100 hover:border-blue-200 hover:shadow-md rounded-xl transition-all duration-200 hover:-translate-y-0.5 overflow-hidden">
-                                            {{-- Franja de color izquierda --}}
-                                            <div class="w-1 bg-blue-500 shrink-0"></div>
-                                            {{-- Contenido principal --}}
+                                            <div class="w-1 brand-bg shrink-0"></div>
                                             <div class="flex-1 min-w-0 px-3 py-3">
                                                 <div class="flex items-center gap-2 mb-1">
-                                                    <p class="text-xs text-gray-700 group-hover:text-blue-700 truncate leading-tight flex-1" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="getMaterialName(line.material_id)"></p>
-                                                    <span class="shrink-0 text-[9px] bg-gray-100 group-hover:bg-blue-100 text-gray-400 group-hover:text-blue-500 px-1.5 py-0.5 rounded-md transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="line.unitLabel"></span>
+                                                    <p class="text-xs text-gray-700 group-hover:brand-text truncate leading-tight flex-1" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="getMaterialName(line.material_id)"></p>
+                                                    <span class="shrink-0 text-[9px] bg-gray-100 group-hover:brand-bg-soft text-gray-400 group-hover:brand-text px-1.5 py-0.5 rounded-md transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="line.unitLabel"></span>
                                                 </div>
                                                 <div class="flex items-center justify-between gap-1">
                                                     <span class="text-[11px] text-gray-400 truncate" style="font-family:'Inter',sans-serif;font-weight:500;">
@@ -206,16 +196,13 @@
                                                     <span class="text-xs text-gray-800 shrink-0" style="font-family:'Inter',sans-serif;font-weight:700;">$<span x-text="lineSubtotal(line).toFixed(2)"></span></span>
                                                 </div>
                                             </div>
-                                            {{-- Botones: siempre en flujo, separados por divisor --}}
                                             <div class="flex flex-col border-l border-gray-100 shrink-0">
-                                                {{-- Ojo --}}
                                                 <button type="button" @click="openModal(idx)"
-                                                        class="flex-1 w-9 flex items-center justify-center text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors border-b border-gray-100">
+                                                        class="flex-1 w-9 flex items-center justify-center text-gray-300 hover:brand-text hover:brand-bg-soft transition-colors border-b border-gray-100">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                     </svg>
                                                 </button>
-                                                {{-- X eliminar --}}
                                                 <button type="button" @click="removeConfirmedLine(idx)"
                                                         class="flex-1 w-9 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,13 +239,13 @@
                             <div class="flex items-center gap-2 flex-wrap">
                                 <div class="flex items-center bg-gray-100 p-0.5 rounded-xl">
                                     <button type="button" @click="setMode('auto')"
-                                            :class="mode === 'auto' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+                                            :class="mode === 'auto' ? 'bg-white shadow brand-text' : 'text-gray-400 hover:text-gray-600'"
                                             class="px-3.5 py-1.5 text-[11px] rounded-[10px] transition-all" style="font-family:'Inter',sans-serif;font-weight:700;">⚡ Auto</button>
                                     <button type="button" @click="setMode('manual')"
-                                            :class="mode === 'manual' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+                                            :class="mode === 'manual' ? 'bg-white shadow brand-text' : 'text-gray-400 hover:text-gray-600'"
                                             class="px-3.5 py-1.5 text-[11px] rounded-[10px] transition-all" style="font-family:'Inter',sans-serif;font-weight:700;">✋ Manual</button>
                                 </div>
-                                <select name="tipo_venta" class="border-gray-200 rounded-xl text-xs focus:border-blue-500 focus:ring-blue-500 bg-gray-50 py-2" style="font-family:'Inter',sans-serif;font-weight:600;">
+                                <select name="tipo_venta" class="border-gray-200 rounded-xl text-xs focus:border-brand focus:ring-brand bg-gray-50 py-2" style="font-family:'Inter',sans-serif;font-weight:600;">
                                     <option value="Contado">💳 Contado</option>
                                     <option value="Credito">📋 Crédito 15d</option>
                                 </select>
@@ -278,7 +265,7 @@
                                         <span class="text-[11px] text-gray-300 uppercase tracking-wide" style="font-family:'Inter',sans-serif;font-weight:700;" x-show="trips.length === 0">Esperando materiales...</span>
                                     </div>
                                     <span class="text-[11px] text-gray-400" style="font-family:'Inter',sans-serif;font-weight:500;">
-                                        <span class="text-blue-600" style="font-weight:700;" x-text="totalDistributed.toFixed(2)"></span> / <span x-text="totalCantidad.toFixed(2)"></span>
+                                        <span class="brand-text" style="font-weight:700;" x-text="totalDistributed.toFixed(2)"></span> / <span x-text="totalCantidad.toFixed(2)"></span>
                                     </span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -291,7 +278,7 @@
                             {{-- Grid flotilla + viajes --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                                {{-- FLOTILLA — modo manual --}}
+                                {{-- FLOTILLA --}}
                                 <div x-show="mode === 'manual'" class="border border-gray-100 rounded-xl overflow-hidden bg-white flex flex-col">
                                     <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between shrink-0">
                                         <span class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:800;">Flotilla</span>
@@ -300,13 +287,13 @@
 
                                     <div class="px-3 pt-3 shrink-0">
                                         <button type="button" @click="addTrip(null, 'Externo / Flete', 0)"
-                                                class="w-full flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50 group transition-all">
-                                            <div class="w-6 h-6 rounded-lg bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center shrink-0 transition-colors">
-                                                <svg class="w-3 h-3 text-gray-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                class="w-full flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-dashed border-gray-200 hover:brand-border hover:brand-bg-soft group transition-all">
+                                            <div class="w-6 h-6 rounded-lg bg-gray-100 group-hover:brand-bg-soft flex items-center justify-center shrink-0 transition-colors">
+                                                <svg class="w-3 h-3 text-gray-400 group-hover:brand-text" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                                                 </svg>
                                             </div>
-                                            <span class="text-[11px] text-gray-400 group-hover:text-blue-600 transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;">Unidad Externa / Flete</span>
+                                            <span class="text-[11px] text-gray-400 group-hover:brand-text transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;">Unidad Externa / Flete</span>
                                         </button>
                                     </div>
 
@@ -323,17 +310,17 @@
                                             <template x-for="unit in clientUnits" :key="unit.id">
                                                 <button type="button"
                                                         @click="addTrip(unit.id, unit.placa + ' · ' + unit.tipo_vehiculo, unit.capacidad_maxima)"
-                                                        class="group flex flex-col items-start p-2.5 rounded-xl border border-gray-100 hover:border-blue-300 hover:bg-blue-50 bg-white transition-all hover:shadow-sm hover:-translate-y-0.5 text-left">
+                                                        class="group flex flex-col items-start p-2.5 rounded-xl border border-gray-100 hover:brand-border hover:brand-bg-soft bg-white transition-all hover:shadow-sm hover:-translate-y-0.5 text-left">
                                                     <div class="flex items-center justify-between w-full mb-1">
-                                                        <span class="text-[11px] text-gray-700 group-hover:text-blue-700 transition-colors truncate pr-1" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="unit.placa"></span>
-                                                        <div class="w-4 h-4 rounded-md bg-gray-100 group-hover:bg-blue-500 flex items-center justify-center transition-colors shrink-0">
+                                                        <span class="text-[11px] text-gray-700 group-hover:brand-text transition-colors truncate pr-1" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="unit.placa"></span>
+                                                        <div class="w-4 h-4 rounded-md bg-gray-100 group-hover:brand-bg flex items-center justify-center transition-colors shrink-0">
                                                             <svg class="w-2.5 h-2.5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
                                                             </svg>
                                                         </div>
                                                     </div>
                                                     <span class="text-[10px] text-gray-400 leading-tight truncate w-full" style="font-family:'Inter',sans-serif;font-weight:500;" x-text="unit.tipo_vehiculo"></span>
-                                                    <span class="text-[10px] text-blue-400 mt-0.5" style="font-family:'Inter',sans-serif;font-weight:700;">Cap: <span x-text="unit.capacidad_maxima"></span></span>
+                                                    <span class="text-[10px] brand-text mt-0.5" style="font-family:'Inter',sans-serif;font-weight:700; opacity:.7;">Cap: <span x-text="unit.capacidad_maxima"></span></span>
                                                 </button>
                                             </template>
                                         </div>
@@ -346,27 +333,26 @@
                                     <div class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between shrink-0">
                                         <span class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:800;">Viajes Programados</span>
                                         <span class="text-[10px] px-2 py-0.5 rounded-full transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;"
-                                              :class="trips.length > 0 ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'"
+                                              :class="trips.length > 0 ? 'brand-bg-soft brand-text' : 'bg-gray-100 text-gray-400'"
                                               x-text="trips.length + ' viaje(s)'"></span>
                                     </div>
 
                                     <div class="p-3 overflow-y-auto custom-scrollbar space-y-2" style="max-height: 320px;">
                                         <template x-for="(trip, index) in trips" :key="index">
-                                            <div class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl p-3 group hover:border-blue-100 hover:shadow-sm transition-all relative overflow-hidden">
-                                                <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-400 rounded-l-xl"></div>
+                                            <div class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl p-3 group hover:brand-border hover:shadow-sm transition-all relative overflow-hidden">
+                                                <div class="absolute left-0 top-0 bottom-0 w-0.5 brand-bg rounded-l-xl"></div>
                                                 <div class="pl-2 flex-1 min-w-0">
                                                     <p class="text-[11px] text-gray-700 truncate mb-1.5" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="trip.name"></p>
                                                     <div class="flex items-center gap-2">
                                                         <span class="text-[9px] text-gray-400 uppercase tracking-wide shrink-0" style="font-family:'Inter',sans-serif;font-weight:700;">Carga:</span>
-                                                        {{-- ✅ FIX: bloqueo de negativos y signos en carga de viaje --}}
                                                         <input type="number" step="0.01" min="0.01" x-model="trip.amount"
                                                                @keydown="if(['-','+','e'].includes($event.key)) $event.preventDefault()"
                                                                @input="if(parseFloat($el.value) <= 0 || isNaN(parseFloat($el.value))) $el.value = 0.01; validateTripLimit(trip)"
                                                                @paste="$event.preventDefault()"
                                                                :readonly="mode === 'auto'"
                                                                :class="mode === 'auto'
-                                                                   ? 'bg-transparent border-transparent text-blue-600 cursor-default'
-                                                                   : 'bg-white border-blue-200 text-blue-700 focus:ring-1 focus:ring-blue-500'"
+                                                                   ? 'bg-transparent border-transparent brand-text cursor-default'
+                                                                   : 'bg-white brand-border brand-text focus:ring-1 focus:ring-brand'"
                                                                class="w-20 p-1 text-xs rounded-lg text-center border transition-colors" style="font-family:'Inter',sans-serif;font-weight:700;">
                                                         <span class="text-[10px] text-gray-300" style="font-family:'Inter',sans-serif;font-weight:700;" x-text="primaryUnitLabel"></span>
                                                     </div>
@@ -403,8 +389,8 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-6 overflow-hidden">
                     <div class="px-5 py-4 border-b border-gray-50 flex items-center gap-3">
-                        <div class="w-7 h-7 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-7 h-7 rounded-xl brand-bg-soft flex items-center justify-center shrink-0">
+                            <svg class="w-3.5 h-3.5 brand-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
@@ -416,7 +402,7 @@
                             <template x-for="(line, idx) in confirmedLines" :key="idx">
                                 <div class="flex justify-between items-start gap-2 text-xs" x-show="line.material_id">
                                     <div class="flex items-start gap-2 min-w-0">
-                                        <div class="w-1 h-1 rounded-full bg-blue-300 mt-1.5 shrink-0"></div>
+                                        <div class="w-1 h-1 rounded-full brand-bg mt-1.5 shrink-0"></div>
                                         <span class="text-gray-500 truncate" style="font-family:'Inter',sans-serif;font-weight:500;" x-text="getMaterialName(line.material_id)"></span>
                                     </div>
                                     <span class="text-gray-800 shrink-0" style="font-family:'Inter',sans-serif;font-weight:700;">$<span x-text="lineSubtotal(line).toFixed(2)"></span></span>
@@ -448,8 +434,8 @@
                         </div>
                     </div>
 
-                    <div class="bg-blue-600 px-5 py-4 flex justify-between items-center">
-                        <span class="text-[10px] text-gray-400 uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:800;">Total</span>
+                    <div class="brand-bg px-5 py-4 flex justify-between items-center">
+                        <span class="text-[10px] uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:800; color:rgba(255,255,255,.5);">Total</span>
                         <span class="text-2xl text-white" style="font-family:'Inter',sans-serif;font-weight:800;">$<span x-text="total.toFixed(2)"></span></span>
                     </div>
                 </div>
@@ -489,14 +475,13 @@
                 <div class="flex items-center gap-4 ml-auto">
                     <div class="text-right hidden sm:block">
                         <p class="text-[9px] text-gray-300 uppercase tracking-widest" style="font-family:'Inter',sans-serif;font-weight:800;">Total</p>
-                        <p class="text-xl text-blue-600" style="font-family:'Inter',sans-serif;font-weight:800;">$<span x-text="total.toFixed(2)"></span></p>
+                        <p class="text-xl brand-text" style="font-family:'Inter',sans-serif;font-weight:800;">$<span x-text="total.toFixed(2)"></span></p>
                     </div>
-                    {{-- Botón: SemiBold --}}
                     <button type="button" @click="submitForm()"
                             :disabled="remaining > 0.1 || trips.length === 0 || confirmedLines.length === 0"
                             :class="(remaining > 0.1 || trips.length === 0 || confirmedLines.length === 0)
                                 ? 'opacity-40 cursor-not-allowed bg-gray-200 text-gray-400'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'"
+                                : 'brand-bg text-white hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'"
                             class="flex items-center gap-2 py-2.5 px-5 rounded-xl shadow transition-all duration-200 text-sm whitespace-nowrap" style="font-family:'Inter',sans-serif;font-weight:600;">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -522,12 +507,12 @@
              x-transition:leave-end="opacity-0 scale-95"
              class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden z-10">
 
-            <div class="bg-blue-600 px-5 py-4 flex items-start justify-between gap-4">
+            <div class="brand-bg px-5 py-4 flex items-start justify-between gap-4">
                 <div>
-                    <p class="text-[9px] text-blue-200 uppercase tracking-widest mb-0.5" style="font-family:'Inter',sans-serif;font-weight:800;">Detalle del material</p>
+                    <p class="text-[9px] uppercase tracking-widest mb-0.5" style="font-family:'Inter',sans-serif;font-weight:800; color:rgba(255,255,255,.45);">Detalle del material</p>
                     <h3 class="text-base text-white leading-tight" style="font-family:'Inter',sans-serif;font-weight:800;" x-text="modalLine ? getMaterialName(modalLine.material_id) : ''"></h3>
                 </div>
-                <button @click="closeModal()" class="text-blue-200 hover:text-white transition-colors w-7 h-7 flex items-center justify-center rounded-lg hover:bg-blue-700 shrink-0">
+                <button @click="closeModal()" class="w-7 h-7 flex items-center justify-center rounded-lg shrink-0 text-white" style="background:rgba(255,255,255,.12);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -557,8 +542,8 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-600 rounded-xl p-3.5 flex justify-between items-center">
-                    <p class="text-xs text-blue-200" style="font-family:'Inter',sans-serif;font-weight:600;">Subtotal línea</p>
+                <div class="brand-bg rounded-xl p-3.5 flex justify-between items-center">
+                    <p class="text-xs" style="font-family:'Inter',sans-serif;font-weight:600; color:rgba(255,255,255,.6);">Subtotal línea</p>
                     <p class="text-xl text-white" style="font-family:'Inter',sans-serif;font-weight:800;">$<span x-text="modalLine ? lineSubtotal(modalLine).toFixed(2) : ''"></span></p>
                 </div>
 
@@ -571,7 +556,7 @@
                         Eliminar
                     </button>
                     <button type="button" @click="closeModal()"
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs py-2.5 rounded-xl transition-colors" style="font-family:'Inter',sans-serif;font-weight:600;">
+                            class="flex-1 brand-bg text-white text-xs py-2.5 rounded-xl transition-colors" style="font-family:'Inter',sans-serif;font-weight:600;">
                         Cerrar
                     </button>
                 </div>
@@ -617,8 +602,7 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
 
         confirmDraft() {
             if (!this.draft.material_id || parseFloat(this.draft.cantidad) <= 0) return;
-            // ✅ FIX: sanear valores antes de confirmar
-            this.draft.cantidad           = Math.max(1, parseInt(this.draft.cantidad) || 1);
+            this.draft.cantidad            = Math.max(1, parseInt(this.draft.cantidad) || 1);
             this.draft.descuentoPorcentaje = Math.min(100, Math.max(0, parseInt(this.draft.descuentoPorcentaje) || 0));
             this.confirmedLines.push({...this.draft});
             this.draft = { material_id:'', cantidad:0, precio:0, descuentoPorcentaje:0, unitLabel:'' };
@@ -662,7 +646,6 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
         },
 
         addTrip(id, name, cap) {
-            // ✅ FIX: garantizar que amount nunca sea negativo
             let amt = cap > 0 ? Math.min(cap, this.remaining) : this.remaining;
             amt = Math.max(0, parseFloat(amt.toFixed(2)));
             this.trips.push({ unit_id:id, name, amount:amt });
@@ -671,7 +654,6 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
 
         validateTripLimit(trip) {
             if (this.mode === 'auto') return;
-            // ✅ FIX: no permitir valores negativos o cero
             if (parseFloat(trip.amount) <= 0 || isNaN(parseFloat(trip.amount))) {
                 trip.amount = 0.01;
             }
@@ -704,11 +686,52 @@ function salesWizard(allUnitsDb, allMaterialsDb) {
 
 <style>
     * { font-family: 'Inter', sans-serif; }
+
+    /* ── Brand color utilities ── */
+    :root { --brand: #121f48; --brand-soft: #eef1f8; --brand-border: #c8cedf; }
+
+    .brand-bg           { background-color: var(--brand) !important; }
+    .brand-bg-soft      { background-color: var(--brand-soft) !important; }
+    .brand-text         { color: var(--brand) !important; }
+    .brand-border       { border-color: var(--brand-border) !important; }
+    .hover\:brand-border:hover { border-color: var(--brand-border) !important; }
+    .hover\:brand-bg-soft:hover { background-color: var(--brand-soft) !important; }
+    .hover\:brand-text:hover { color: var(--brand) !important; }
+    .hover\:brand-bg:hover  { background-color: var(--brand) !important; }
+    .group:hover .group-hover\:brand-text { color: var(--brand) !important; }
+    .group:hover .group-hover\:brand-bg   { background-color: var(--brand) !important; }
+    .group:hover .group-hover\:brand-bg-soft { background-color: var(--brand-soft) !important; }
+
+    /* Alpine dynamic :class bg-blue-600 → brand */
+    .bg-blue-600 { background-color: var(--brand) !important; }
+    .text-blue-600 { color: var(--brand) !important; }
+    .bg-blue-500  { background-color: #1a2d6b !important; }
+    .bg-blue-400  { background-color: #2a3f80 !important; }
+    .border-blue-200 { border-color: var(--brand-border) !important; }
+    .focus\:border-blue-500:focus { border-color: var(--brand) !important; }
+    .focus\:ring-blue-500:focus   { --tw-ring-color: var(--brand) !important; }
+    .focus\:border-brand:focus    { border-color: var(--brand) !important; }
+    .focus\:ring-brand:focus      { --tw-ring-color: var(--brand) !important; }
+    .hover\:border-blue-300:hover { border-color: var(--brand-border) !important; }
+    .hover\:bg-blue-50:hover      { background-color: var(--brand-soft) !important; }
+    .hover\:text-blue-700:hover   { color: var(--brand) !important; }
+    .hover\:bg-blue-700:hover     { background-color: #0d1633 !important; }
+    .bg-blue-100  { background-color: var(--brand-soft) !important; }
+    .bg-blue-50   { background-color: var(--brand-soft) !important; }
+    .border-blue-100 { border-color: var(--brand-border) !important; }
+    .text-blue-200 { color: rgba(255,255,255,.5) !important; }
+    .text-blue-300 { color: rgba(255,255,255,.35) !important; }
+    .text-blue-400 { color: #4a6fa5 !important; }
+    .text-blue-500 { color: var(--brand) !important; }
+    .text-blue-700 { color: var(--brand) !important; }
+
+    /* Progress bar brand color */
+    .bg-blue-500 { background-color: var(--brand) !important; }
+
     .custom-scrollbar::-webkit-scrollbar       { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 20px; }
 
-    /* ✅ FIX: ocultar flechas nativas de inputs numéricos en Chrome/Safari/Firefox */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }

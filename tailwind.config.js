@@ -11,6 +11,16 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                blue: {
+                    DEFAULT: '#121f48', // Esto aplica para bg-blue, text-blue, etc.
+                    // Opcional: Si usas números en tus clases (ej. bg-blue-500 o bg-blue-600)
+                    // puedes mapearlos al mismo color para que no se rompa tu diseño actual.
+                    500: '#121f48',
+                    600: '#121f48',
+                    700: '#0d1633', // Un tono un poco más oscuro por si necesitas un efecto "hover"
+                }
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
