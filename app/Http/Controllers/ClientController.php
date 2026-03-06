@@ -59,6 +59,15 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Cliente registrado exitosamente.');
     }
 
+    public function salesHistory($id)
+    {
+        $sales = \App\Models\Sale::where('client_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get(['id','folio','tipo_venta','subtotal','descuento','iva','total','calificacion','created_at']);
+
+        return response()->json(['sales' => $sales]);
+    }
+
     public function edit(Client $client)
     {
         return view('clients.edit', compact('client'));
