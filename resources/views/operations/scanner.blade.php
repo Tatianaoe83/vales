@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
@@ -13,20 +13,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
+        :root { --brand: #121f48; --brand-soft: #eef1f8; --brand-border: #c8cedf; }
         * { font-family: 'Inter', sans-serif; }
         #reader { width: 100%; height: 100%; }
         #reader video { object-fit: cover; width: 100% !important; height: 100% !important; border-radius: 0; }
-        #reader > div { display: none !important; } /* oculta controles nativos de html5-qrcode */
+        #reader > div { display: none !important; }
         [x-cloak] { display: none !important; }
-
-        /* Barra de cooldown */
-        @keyframes cooldown-bar {
-            from { width: 100%; }
-            to   { width: 0%; }
-        }
-        .cooldown-bar-anim {
-            animation: cooldown-bar linear forwards;
-        }
+        @keyframes cooldown-bar { from { width: 100%; } to { width: 0%; } }
+        .cooldown-bar-anim { animation: cooldown-bar linear forwards; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col" x-data="cameraApp()" x-init="startCamera()">
@@ -34,7 +28,8 @@
     {{-- ── HEADER ── --}}
     <div class="bg-white h-16 flex justify-between items-center px-4 shadow-sm z-20 sticky top-0 border-b border-gray-100">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm"
+                 style="background:#121f48;">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
@@ -85,7 +80,7 @@
 
             {{-- Barra de cooldown --}}
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-                <div x-ref="cooldownBar" class="h-full bg-green-400 transition-none" style="width:100%;"></div>
+                <div x-ref="cooldownBar" class="h-full transition-none" style="width:100%; background:#eef1f8;"></div>
             </div>
 
             {{-- Etiqueta guía --}}
@@ -101,12 +96,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
                 </svg>
                 <input type="text" x-model="inputManual" @keydown.enter="simularEscaneo()"
-                       class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none uppercase shadow-sm"
+                       class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-sm outline-none uppercase shadow-sm transition"
                        style="font-weight:500;"
                        placeholder="Código manual...">
             </div>
             <button @click="simularEscaneo()"
-                    class="bg-gray-800 hover:bg-gray-900 text-white px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center">
+                    class="text-white px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center"
+                    style="background:#121f48;"
+                    onmouseover="this.style.background='#0d1633'"
+                    onmouseout="this.style.background='#121f48'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                 </svg>
@@ -121,8 +119,8 @@
              style="display:none;"
              class="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-            {{-- Header de la card --}}
-            <div class="bg-gray-900 text-white px-5 pt-5 pb-6 relative overflow-hidden">
+            {{-- Header de la card — usa brand color --}}
+            <div class="text-white px-5 pt-5 pb-6 relative overflow-hidden" style="background:#121f48;">
                 {{-- Ícono decorativo --}}
                 <svg class="absolute -right-4 -bottom-4 w-24 h-24 text-white/5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
@@ -130,7 +128,7 @@
 
                 <div class="flex items-start justify-between gap-3 mb-4">
                     <div>
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1" style="font-weight:800;">Unidad autorizada</p>
+                        <p class="text-[9px] text-white/50 uppercase tracking-widest mb-1" style="font-weight:800;">Unidad autorizada</p>
                         <h2 class="text-3xl text-white tracking-tight uppercase" style="font-weight:800;" x-text="vale?.unit?.placa ?? 'EXTERNA'"></h2>
                     </div>
                     <button @click="resetTodo()"
@@ -145,7 +143,7 @@
                     <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 100 4v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2a2 2 0 100-4V6z"/>
                     </svg>
-                    <span class="text-xs text-gray-300 font-mono" style="font-weight:600;" x-text="vale?.folio_vale"></span>
+                    <span class="text-xs text-white/80 font-mono" style="font-weight:600;" x-text="vale?.folio_vale"></span>
                 </div>
             </div>
 
@@ -154,7 +152,7 @@
                 <div>
                     <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-2" style="font-weight:800;">Carga / Material</p>
                     <p class="text-sm text-gray-800 leading-tight" style="font-weight:700;" x-text="vale?.material?.name"></p>
-                    <p class="text-xs text-blue-500 mt-0.5" style="font-weight:600;">
+                    <p class="text-xs mt-0.5" style="font-weight:600; color:#121f48;">
                         <span x-text="vale?.cantidad"></span> <span x-text="vale?.material?.unit"></span>
                     </p>
                 </div>
@@ -186,11 +184,15 @@
                     <p class="text-[9px] text-green-600 uppercase tracking-widest mb-3 text-center" style="font-weight:800;">Paso Final · Confirmar Salida</p>
                     <div class="grid grid-cols-2 gap-2">
                         <button @click="inputManual='CMD_SURTIDO'; simularEscaneo()"
-                                class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-2.5 rounded-xl shadow-sm transition-colors" style="font-weight:700;">
+                                class="text-white text-xs py-2.5 rounded-xl shadow-sm transition-colors"
+                                style="background:#121f48; font-weight:700;"
+                                onmouseover="this.style.background='#0d1633'"
+                                onmouseout="this.style.background='#121f48'">
                             Surtido
                         </button>
                         <button @click="inputManual='CMD_VACIO'; simularEscaneo()"
-                                class="bg-white hover:bg-gray-50 text-gray-600 text-xs py-2.5 rounded-xl border border-gray-200 shadow-sm transition-colors" style="font-weight:700;">
+                                class="bg-white hover:bg-gray-50 text-gray-600 text-xs py-2.5 rounded-xl border border-gray-200 shadow-sm transition-colors"
+                                style="font-weight:700;">
                             Vacío
                         </button>
                     </div>
@@ -210,16 +212,12 @@ function cameraApp() {
         mensajeGuia: 'Escanea el vale',
         inputManual: '',
 
-        // ── Cooldown ──
-        COOLDOWN_SECS: 7,          // segundos entre lecturas
+        COOLDOWN_SECS: 7,
         cooldownActive: false,
         cooldownRemaining: 0,
         _cooldownTimer: null,
         _cooldownInterval: null,
 
-        // ─────────────────────────────────────────
-        // 1. CÁMARA
-        // ─────────────────────────────────────────
         async startCamera() {
             if (this.html5QrcodeScanner) {
                 try { await this.html5QrcodeScanner.stop(); } catch (e) {}
@@ -250,14 +248,10 @@ function cameraApp() {
             }
         },
 
-        // ─────────────────────────────────────────
-        // 2. COOLDOWN
-        // ─────────────────────────────────────────
         startCooldown() {
-            this.cooldownActive   = true;
+            this.cooldownActive    = true;
             this.cooldownRemaining = this.COOLDOWN_SECS;
 
-            // Animación barra
             const bar = this.$refs.cooldownBar;
             if (bar) {
                 bar.style.transition = 'none';
@@ -268,14 +262,12 @@ function cameraApp() {
                 });
             }
 
-            // Contador visible
             clearInterval(this._cooldownInterval);
             this._cooldownInterval = setInterval(() => {
                 this.cooldownRemaining--;
                 if (this.cooldownRemaining <= 0) clearInterval(this._cooldownInterval);
             }, 1000);
 
-            // Fin del cooldown
             clearTimeout(this._cooldownTimer);
             this._cooldownTimer = setTimeout(() => {
                 this.cooldownActive = false;
@@ -283,9 +275,6 @@ function cameraApp() {
             }, this.COOLDOWN_SECS * 1000);
         },
 
-        // ─────────────────────────────────────────
-        // 3. ESCANEO
-        // ─────────────────────────────────────────
         simularEscaneo() {
             if (!this.inputManual.trim()) return;
             this.onScanSuccess(this.inputManual.trim());
@@ -293,11 +282,9 @@ function cameraApp() {
         },
 
         async onScanSuccess(codigo) {
-            // Bloquear si está en cooldown (excepto comandos manuales de botones)
             const esComandoManual = ['CMD_SURTIDO','CMD_VACIO'].includes(codigo.toUpperCase());
             if (this.cooldownActive && !esComandoManual) return;
 
-            // Pausar cámara para no leer dobles
             if (this.html5QrcodeScanner) {
                 try { await this.html5QrcodeScanner.pause(); } catch(e) {}
             }
@@ -308,19 +295,15 @@ function cameraApp() {
             if (!this.vale) {
                 await this.lookupVale(codigo);
             } else {
-                if (this.context === 'entrada')      await this.confirmarEntrada(codigo);
-                else if (this.context === 'salida')  await this.procesarComando(codigo);
+                if (this.context === 'entrada')     await this.confirmarEntrada(codigo);
+                else if (this.context === 'salida') await this.procesarComando(codigo);
             }
 
-            // Reanudar cámara tras cooldown
             if (this.html5QrcodeScanner) {
                 try { await this.html5QrcodeScanner.resume(); } catch(e) {}
             }
         },
 
-        // ─────────────────────────────────────────
-        // 4. BACKEND
-        // ─────────────────────────────────────────
         async lookupVale(codigo) {
             try {
                 const res  = await this._post('/operations/lookup', { code: codigo });
@@ -346,8 +329,8 @@ function cameraApp() {
 
         async procesarComando(codigo) {
             const cmd = codigo.toUpperCase();
-            if (cmd.includes('SURTIDO'))     await this.enviarServidor('salida_surtido');
-            else if (cmd.includes('VACIO'))  await this.enviarServidor('salida_vacio');
+            if (cmd.includes('SURTIDO'))    await this.enviarServidor('salida_surtido');
+            else if (cmd.includes('VACIO')) await this.enviarServidor('salida_vacio');
             else this.alertError('Código inválido. Usa los botones Surtido / Vacío.');
         },
 
@@ -378,9 +361,6 @@ function cameraApp() {
             }
         },
 
-        // ─────────────────────────────────────────
-        // 5. UTILIDADES
-        // ─────────────────────────────────────────
         _post(url, body) {
             return fetch(url, {
                 method: 'POST',
@@ -409,7 +389,6 @@ function cameraApp() {
             this.inputManual = '';
         },
 
-        // Todos los errores pasan por aquí
         alertError(msg) {
             this.playSound('error');
             return Swal.fire({
@@ -417,7 +396,7 @@ function cameraApp() {
                 title: 'Atención',
                 text: msg,
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#2563eb',
+                confirmButtonColor: '#121f48',
                 customClass: { popup: 'rounded-2xl shadow-xl', confirmButton: 'rounded-xl' }
             });
         },
