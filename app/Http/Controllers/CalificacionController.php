@@ -35,17 +35,16 @@ class CalificacionController extends Controller
         ])->values();
 
         // ── Detalle de materiales (agrupado por material) ─────────────────
-        // Tomamos los vales y agrupamos para mostrar el resumen por material
         $materialsDetail = $sale->vales
             ->groupBy('material_id')
             ->map(function ($group) {
                 $first = $group->first();
                 return [
-                    'nombre'   => $first->material->name  ?? '—',
-                    'unidad'   => $first->material->unit  ?? '',
-                    'cantidad' => $group->sum('cantidad'),
-                    'precio'   => 0, // precio no está en vales, se muestra cantidad neta
-                    'descuento'=> 0,
+                    'nombre'    => $first->material->name ?? '—',
+                    'unidad'    => $first->material->unit ?? '',
+                    'cantidad'  => $group->sum('cantidad'),
+                    'precio'    => 0,
+                    'descuento' => 0,
                 ];
             })->values();
 
@@ -69,7 +68,7 @@ class CalificacionController extends Controller
     {
         $request->validate([
             'sale_id'      => 'required|exists:sales,id',
-            'calificacion' => 'required|integer|between:1,5',
+            'calificacion' => 'required|integer|between:1,3',
         ]);
 
         \DB::table('sales')->where('id', $request->sale_id)->update([

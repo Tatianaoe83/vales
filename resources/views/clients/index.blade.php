@@ -214,7 +214,8 @@
             </div>
             <div class="bg-white px-5 py-4 text-center">
                 <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1" style="font-weight:700;">Satisfacción Prom.</p>
-                <p id="statRating" class="text-2xl text-gray-800" style="font-weight:800;">—</p>
+                {{-- Contenedor para estrellas proporcionales del promedio --}}
+                <div id="statRating" class="flex justify-center items-center gap-1 min-h-[2rem]">—</div>
             </div>
         </div>
 
@@ -264,36 +265,52 @@
 <script>
 const historyRoute = "{{ route('clients.salesHistory', ':id') }}";
 
-// Sistema de 3 calificaciones: 1 = Malo, 3 = Regular, 5 = Excelente
-const RATING_MAP = {
-    1: { face: '😞', label: 'Malo',     color: '#ef4444', bg: '#fef2f2', border: '#fecaca' },
-    3: { face: '😐', label: 'Regular',  color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
-    5: { face: '🤩', label: '¡Genial!', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
-};
-
-// Mapea cualquier valor numérico al más cercano de {1, 3, 5}
-function nearestRating(val) {
-    return [1, 3, 5].reduce((prev, curr) =>
-        Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev
-    );
+// ─── renderStars ──────────────────────────────────────────────────────────────
+// value  = número decimal de estrellas llenas (0..3)
+// total  = total de estrellas (3)
+// sizePx = tamaño px de cada svg
+// color  = color de relleno activo
+function renderStars(value, total, sizePx, color) {
+    const sz  = sizePx || 16;
+    const col = color  || '#f59e0b';
+    const uid = 'hs' + Math.random().toString(36).slice(2, 7);
+    let html  = '';
+    for (let i = 0; i < total; i++) {
+        const pct = Math.round(Math.min(Math.max(value - i, 0), 1) * 100);
+        const gid = uid + i;
+        html += `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"
+                      style="display:inline-block;flex-shrink:0;vertical-align:middle;">
+            <defs>
+                <linearGradient id="${gid}" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="${pct}%" stop-color="${col}"/>
+                    <stop offset="${pct}%" stop-color="#d1d5db"/>
+                </linearGradient>
+            </defs>
+            <path fill="url(#${gid})"
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88
+                     L12 17.77l-6.18 3.25L7 14.14 2 9.27
+                     l6.91-1.01L12 2z"/>
+        </svg>`;
+    }
+    return html;
 }
 
+// Badge coloreado: estrellas + texto label según valor
 function buildRatingHtml(calif) {
     if (calif === null || calif === undefined || calif === '') {
         return '<span class="text-[11px] text-gray-300 italic" style="font-weight:500;">Sin calificar</span>';
     }
-    const r = RATING_MAP[nearestRating(parseFloat(calif))];
-    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border"
-                  style="font-weight:700; color:${r.color}; background:${r.bg}; border-color:${r.border};">
-                <span style="font-size:1rem; line-height:1;">${r.face}</span>
-                ${r.label}
-            </span>`;
-}
+    const v = parseFloat(calif);
+    // Color del badge según nivel
+    let col = '#f59e0b', bg = '#fffbeb', border = '#fde68a', label = 'Regular';
+    if (v >= 2.5)      { col = '#16a34a'; bg = '#f0fdf4'; border = '#bbf7d0'; label = '¡Genial!'; }
+    else if (v < 1.5)  { col = '#ef4444'; bg = '#fef2f2'; border = '#fecaca'; label = 'Malo'; }
 
-function buildStatRating(promCalif) {
-    if (promCalif === 'N/A') return '<span class="text-gray-400">N/A</span>';
-    const r = RATING_MAP[nearestRating(parseFloat(promCalif))];
-    return `<span style="color:${r.color};">${r.face} ${promCalif}</span>`;
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border"
+                  style="font-weight:700; color:${col}; background:${bg}; border-color:${border};">
+                ${renderStars(v, 3, 13, col)}
+                <span style="margin-left:2px;">${label}</span>
+            </span>`;
 }
 
 function openHistory(clientId, clientName) {
@@ -320,19 +337,32 @@ function openHistory(clientId, clientName) {
             document.getElementById('historyEmpty').style.display = 'flex';
             document.getElementById('statCount').textContent  = '0';
             document.getElementById('statTotal').textContent  = '$0.00';
-            document.getElementById('statRating').innerHTML   = 'N/A';
+            document.getElementById('statRating').innerHTML   = '<span class="text-gray-400 text-sm" style="font-weight:600;">N/A</span>';
             return;
         }
 
         const totalMonto = data.sales.reduce((s, v) => s + parseFloat(v.total || 0), 0);
         const califs     = data.sales.filter(v => v.calificacion !== null && v.calificacion !== '');
-        const promCalif  = califs.length > 0
-            ? (califs.reduce((s, v) => s + parseFloat(v.calificacion), 0) / califs.length).toFixed(1)
-            : 'N/A';
+        const promedio   = califs.length > 0
+            ? califs.reduce((s, v) => s + parseFloat(v.calificacion), 0) / califs.length
+            : null;
 
         document.getElementById('statCount').textContent = data.sales.length;
         document.getElementById('statTotal').textContent = '$' + totalMonto.toLocaleString('es-MX', { minimumFractionDigits:2, maximumFractionDigits:2 });
-        document.getElementById('statRating').innerHTML  = buildStatRating(promCalif);
+
+        // Promedio con estrellas proporcionales + número
+        if (promedio !== null) {
+            let col = '#f59e0b';
+            if (promedio >= 2.5) col = '#16a34a';
+            else if (promedio < 1.5) col = '#ef4444';
+            document.getElementById('statRating').innerHTML =
+                `<div class="flex flex-col items-center gap-1">
+                    <div class="flex gap-0.5">${renderStars(promedio, 3, 18, col)}</div>
+                    <span class="text-xs" style="font-weight:700; color:${col};">${promedio.toFixed(1)} / 3</span>
+                </div>`;
+        } else {
+            document.getElementById('statRating').innerHTML = '<span class="text-gray-400 text-sm" style="font-weight:600;">N/A</span>';
+        }
 
         const tbody = document.getElementById('historyTableBody');
         tbody.innerHTML = '';

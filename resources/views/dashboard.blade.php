@@ -111,37 +111,29 @@
                         <p class="text-[10px] uppercase tracking-widest" style="font-weight:700; color:rgba(255,255,255,.5);">Satisfacción</p>
                         <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.12);">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                             </svg>
                         </div>
                     </div>
 
                     <div class="relative z-10">
-                        {{-- Carita según promedio --}}
-                        @php
-                            $avg = $promedioCalificacion ?? 0;
-                            $kpiFace = match(true) {
-                                $avg >= 4.0 => '🤩',
-                                $avg >= 2.0 => '😐',
-                                $avg >  0   => '😞',
-                                default     => '—',
-                            };
-                        @endphp
-                        <div class="flex items-end gap-2 mb-2">
-                            <span class="text-3xl leading-none">{{ $kpiFace }}</span>
-                            <div class="flex items-end gap-1 mb-0.5">
-                                <p class="text-2xl text-white leading-none" style="font-weight:900;">
-                                    {{ number_format($avg, 1) }}
-                                </p>
-                                <span class="text-sm mb-0.5" style="color:rgba(255,255,255,.45); font-weight:600;">/ 5</span>
-                            </div>
+                        @php $avg = $promedioCalificacion ?? 0; @endphp
+
+                        {{-- Estrellas SVG proporcionales (renderizadas por JS al cargar) --}}
+                        <div id="kpi-stars" class="flex gap-1 mb-2"></div>
+
+                        <div class="flex items-end gap-1 mb-2">
+                            <p class="text-2xl text-white leading-none" style="font-weight:900;">
+                                {{ number_format($avg, 1) }}
+                            </p>
+                            <span class="text-sm mb-0.5" style="color:rgba(255,255,255,.45); font-weight:600;">/ 3</span>
                         </div>
 
                         <div class="w-full rounded-full h-1.5 mb-2.5 overflow-hidden" style="background:rgba(255,255,255,.15);">
                             <div class="h-1.5 bg-white rounded-full"
                                  id="kpiRatingBar"
-                                 style="width:0%; transition: width 1.2s cubic-bezier(.4,0,.2,1);"
-                                 data-width="{{ ($avg / 5) * 100 }}%">
+                                 style="width:0%; transition:width 1.2s cubic-bezier(.4,0,.2,1);"
+                                 data-width="{{ ($avg / 3) * 100 }}%">
                             </div>
                         </div>
 
@@ -223,14 +215,14 @@
 
             </div>
 
-            {{-- ── WIDGET CALIFICACIONES (3 caritas) ── --}}
+            {{-- ── WIDGET CALIFICACIONES ── --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
                 <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-xl flex items-center justify-center shrink-0" style="background:#121f48;">
                             <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                             </svg>
                         </div>
                         <h4 class="text-sm text-gray-800 uppercase tracking-wide" style="font-weight:700;">Satisfacción del Cliente</h4>
@@ -252,66 +244,70 @@
                                         stroke-width="9"
                                         stroke-linecap="round"
                                         stroke-dasharray="238.76"
-                                        stroke-dashoffset="{{ 238.76 - (238.76 * (($promedioCalificacion ?? 0) / 5)) }}"
-                                        style="transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);"/>
+                                        stroke-dashoffset="{{ 238.76 - (238.76 * (($promedioCalificacion ?? 0) / 3)) }}"
+                                        style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);"/>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
                                 <span class="text-3xl leading-none" style="font-weight:900; color:#121f48;">
                                     {{ number_format($promedioCalificacion ?? 0, 1) }}
                                 </span>
-                                <span class="text-[10px] text-gray-300 mt-0.5" style="font-weight:700;">DE 5.0</span>
+                                <span class="text-[10px] text-gray-300 mt-0.5" style="font-weight:700;">DE 3.0</span>
                             </div>
                         </div>
 
+                        {{-- Estrellas proporcionales bajo el anillo --}}
+                        <div id="widget-stars" class="flex gap-1 mb-3"></div>
+
                         @php
                             $avg = $promedioCalificacion ?? 0;
-                            [$wLabel, $wFace, $wColor, $wBg, $wBorder] = match(true) {
-                                $avg >= 4.0 => ['¡Genial!',  '🤩', '#16a34a', '#f0fdf4', '#bbf7d0'],
-                                $avg >= 2.0 => ['Regular',   '😐', '#d97706', '#fffbeb', '#fde68a'],
-                                $avg >  0   => ['Malo',      '😞', '#ef4444', '#fef2f2', '#fecaca'],
-                                default     => ['Sin datos', '—',  '#9ca3af', '#f9fafb', '#e5e7eb'],
+                            [$wLabel, $wColor, $wBg, $wBorder] = match(true) {
+                                $avg >= 2.5 => ['¡Genial!',  '#16a34a', '#f0fdf4', '#bbf7d0'],
+                                $avg >= 1.5 => ['Regular',   '#d97706', '#fffbeb', '#fde68a'],
+                                $avg >  0   => ['Malo',      '#ef4444', '#fef2f2', '#fecaca'],
+                                default     => ['Sin datos', '#9ca3af', '#f9fafb', '#e5e7eb'],
                             };
                         @endphp
-                        <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border" style="font-weight:700; color:{{ $wColor }}; background:{{ $wBg }}; border-color:{{ $wBorder }};">
-                            <span>{{ $wFace }}</span> {{ $wLabel }}
+                        <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border"
+                              style="font-weight:700; color:{{ $wColor }}; background:{{ $wBg }}; border-color:{{ $wBorder }};">
+                            {{ $wLabel }}
                         </span>
                         <p class="text-[11px] text-gray-300 mt-2" style="font-weight:400;">Promedio esta semana</p>
                     </div>
 
-                    {{-- Barras de 3 caritas --}}
+                    {{-- Barras de distribución --}}
                     <div class="px-8 py-8 md:col-span-2 flex flex-col justify-center">
                         <p class="text-[10px] text-gray-300 uppercase tracking-widest mb-6" style="font-weight:800;">Distribución de Respuestas</p>
 
                         @php
-                            // Sistema de 3 calificaciones: 1=Malo, 3=Regular, 5=Genial
                             $distribucion = $distribucionCalificaciones ?? [];
                             $malo    = ($distribucion[1] ?? 0);
-                            $regular = ($distribucion[3] ?? 0);
-                            $genial  = ($distribucion[5] ?? 0);
+                            $regular = ($distribucion[2] ?? 0);
+                            $genial  = ($distribucion[3] ?? 0);
                             $totalResp = max($malo + $regular + $genial, 1);
 
+                            // value = estrellas a renderizar proporcionales, bar = color barra
                             $faces = [
-                                ['face'=>'🤩', 'label'=>'¡Genial!', 'count'=>$genial,  'color'=>'#16a34a', 'bar'=>'#16a34a', 'bg'=>'#f0fdf4'],
-                                ['face'=>'😐', 'label'=>'Regular',  'count'=>$regular, 'color'=>'#d97706', 'bar'=>'#d97706', 'bg'=>'#fffbeb'],
-                                ['face'=>'😞', 'label'=>'Malo',     'count'=>$malo,    'color'=>'#ef4444', 'bar'=>'#ef4444', 'bg'=>'#fef2f2'],
+                                ['label'=>'¡Genial!', 'stars'=>3, 'count'=>$genial,  'color'=>'#16a34a', 'bar'=>'#16a34a'],
+                                ['label'=>'Regular',  'stars'=>2, 'count'=>$regular, 'color'=>'#d97706', 'bar'=>'#d97706'],
+                                ['label'=>'Malo',     'stars'=>1, 'count'=>$malo,    'color'=>'#ef4444', 'bar'=>'#ef4444'],
                             ];
                         @endphp
 
                         <div class="space-y-5">
-                            @foreach($faces as $f)
+                            @foreach($faces as $fi => $f)
                             @php $pct = round(($f['count'] / $totalResp) * 100); @endphp
                             <div class="flex items-center gap-4">
 
-                                {{-- Carita + etiqueta --}}
-                                <div class="flex items-center gap-2 w-24 shrink-0">
-                                    <span class="text-xl leading-none">{{ $f['face'] }}</span>
-                                    <span class="text-[10px] text-gray-500 truncate" style="font-weight:700;">{{ $f['label'] }}</span>
+                                {{-- Estrellas SVG + etiqueta --}}
+                                <div class="flex items-center gap-2 w-36 shrink-0">
+                                    <div class="dist-stars flex gap-0.5" data-stars="{{ $f['stars'] }}"></div>
+                                    <span class="text-[10px] text-gray-500" style="font-weight:700;">{{ $f['label'] }}</span>
                                 </div>
 
                                 {{-- Barra --}}
                                 <div class="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
                                     <div class="h-2.5 rounded-full rating-bar"
-                                         style="width:0%; background:{{ $f['bar'] }}; transition: width 1.1s cubic-bezier(.4,0,.2,1);"
+                                         style="width:0%; background:{{ $f['bar'] }}; transition:width 1.1s cubic-bezier(.4,0,.2,1);"
                                          data-width="{{ $pct }}%">
                                     </div>
                                 </div>
@@ -335,6 +331,35 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ─── Función renderStars reutilizable ─────────────────────────────────────────
+// value  = número decimal de estrellas llenas (ej: 2.3)
+// total  = total de estrellas (3)
+// sizePx = tamaño en px de cada estrella
+function renderStars(value, total, sizePx, color) {
+    const sz  = sizePx || 18;
+    const col = color  || '#f59e0b';
+    const uid = 'ds' + Math.random().toString(36).slice(2, 7);
+    let html  = '';
+    for (let i = 0; i < total; i++) {
+        const pct = Math.round(Math.min(Math.max(value - i, 0), 1) * 100);
+        const gid = uid + i;
+        html += `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"
+                      style="display:inline-block;flex-shrink:0;vertical-align:middle;">
+            <defs>
+                <linearGradient id="${gid}" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="${pct}%" stop-color="${col}"/>
+                    <stop offset="${pct}%" stop-color="#d1d5db"/>
+                </linearGradient>
+            </defs>
+            <path fill="url(#${gid})"
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88
+                     L12 17.77l-6.18 3.25L7 14.14 2 9.27
+                     l6.91-1.01L12 2z"/>
+        </svg>`;
+    }
+    return html;
+}
+
 new Chart(document.getElementById('salesChart').getContext('2d'), {
     type: 'bar',
     data: {
@@ -367,6 +392,25 @@ new Chart(document.getElementById('salesChart').getContext('2d'), {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    const avg = {{ $promedioCalificacion ?? 0 }};
+
+    // KPI card — estrellas blancas sobre fondo oscuro
+    const kpiEl = document.getElementById('kpi-stars');
+    if (kpiEl) kpiEl.innerHTML = renderStars(avg, 3, 16, '#ffffff');
+
+    // Widget anillo — estrellas amber
+    const widgetEl = document.getElementById('widget-stars');
+    if (widgetEl) widgetEl.innerHTML = renderStars(avg, 3, 20, '#f59e0b');
+
+    // Barras de distribución — estrellas según nivel
+    const starColors = { 1: '#ef4444', 2: '#d97706', 3: '#16a34a' };
+    document.querySelectorAll('.dist-stars').forEach(el => {
+        const n   = parseInt(el.dataset.stars);
+        const col = starColors[n] || '#f59e0b';
+        el.innerHTML = renderStars(n, 3, 14, col);
+    });
+
+    // Animación barras
     setTimeout(() => {
         const kpi = document.getElementById('kpiRatingBar');
         if (kpi) kpi.style.width = kpi.dataset.width;

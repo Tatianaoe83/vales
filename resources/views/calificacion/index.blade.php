@@ -11,90 +11,90 @@
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #eef1f8 0%, #ffffff 50%, #eef1f8 100%); }
 
-        /* ── Animations ── */
         @keyframes pulse-glow { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:.8;transform:scale(1.1)} }
-        @keyframes float      { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         @keyframes fade-up    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         @keyframes pop-in     { 0%{transform:scale(.75);opacity:0} 70%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} }
         @keyframes sheet-up   { from{transform:translateY(100%)} to{transform:translateY(0)} }
         @keyframes fade-in    { from{opacity:0} to{opacity:1} }
-
         @keyframes logo-breathe {
-            0%,100% { transform: scale(1);    box-shadow: 0 8px 40px rgba(18,31,72,.15); }
-            50%      { transform: scale(1.04); box-shadow: 0 16px 56px rgba(18,31,72,.28); }
+            0%,100% { transform:scale(1);    box-shadow:0 8px 40px rgba(18,31,72,.15); }
+            50%      { transform:scale(1.04); box-shadow:0 16px 56px rgba(18,31,72,.28); }
         }
-        @keyframes ring-spin { to { transform: rotate(360deg); } }
+        @keyframes ring-spin { to { transform:rotate(360deg); } }
+        @keyframes star-pop  { 0%{transform:scale(0) rotate(-30deg);opacity:0} 70%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
 
         .pulse   { animation: pulse-glow 2.8s ease-in-out infinite; }
-        .float   { animation: float 3.5s ease-in-out infinite; }
         .fade-up { animation: fade-up .45s ease forwards; opacity: 0; }
         .pop     { animation: pop-in .4s cubic-bezier(.34,1.56,.64,1) forwards; opacity: 0; }
 
         .logo-card {
             animation: logo-breathe 3.8s ease-in-out infinite;
-            width: 5rem; height: 5rem;
-            border-radius: 20px;
-            background: #fff;
-            box-shadow: 0 8px 40px rgba(18,31,72,.18);
-            border: 1px solid rgba(18,31,72,.12);
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; padding: 12px;
+            width:5rem; height:5rem; border-radius:20px;
+            background:#fff; box-shadow:0 8px 40px rgba(18,31,72,.18);
+            border:1px solid rgba(18,31,72,.12);
+            display:flex; align-items:center; justify-content:center;
+            overflow:hidden; padding:12px;
         }
-        .logo-card img { width: 100%; height: 100%; object-fit: contain; }
-
+        .logo-card img { width:100%; height:100%; object-fit:contain; }
         .ring-outer {
-            position: absolute; width: 160px; height: 160px;
-            border-radius: 50%;
-            border: 2px dashed rgba(18,31,72,.2);
-            animation: ring-spin 18s linear infinite;
+            position:absolute; width:160px; height:160px; border-radius:50%;
+            border:2px dashed rgba(18,31,72,.2);
+            animation:ring-spin 18s linear infinite;
         }
         .ring-inner {
-            position: absolute; width: 130px; height: 130px;
-            border-radius: 50%;
-            border: 2px dashed rgba(18,31,72,.12);
-            animation: ring-spin 12s linear infinite reverse;
+            position:absolute; width:130px; height:130px; border-radius:50%;
+            border:2px dashed rgba(18,31,72,.12);
+            animation:ring-spin 12s linear infinite reverse;
         }
 
-        .face-btn { cursor: pointer; transition: transform .15s cubic-bezier(.34,1.56,.64,1); }
-        .face-btn:active { transform: scale(.8) !important; }
-
-        .screen { position: fixed; inset: 0; display: flex; transition: opacity .35s ease, transform .35s ease; }
-        .screen.off { opacity: 0; pointer-events: none; transform: scale(.96); }
-        .screen.on  { opacity: 1; pointer-events: all;  transform: scale(1); }
+        .screen { position:fixed; inset:0; display:flex; transition:opacity .35s ease, transform .35s ease; }
+        .screen.off { opacity:0; pointer-events:none; transform:scale(.96); }
+        .screen.on  { opacity:1; pointer-events:all;  transform:scale(1); }
 
         #backdrop {
-            position: fixed; inset: 0; z-index: 50;
-            background: rgba(10,18,40,.55); backdrop-filter: blur(10px);
-            display: none; align-items: flex-end;
-            animation: fade-in .2s ease;
+            position:fixed; inset:0; z-index:50;
+            background:rgba(10,18,40,.55); backdrop-filter:blur(10px);
+            display:none; align-items:flex-end; animation:fade-in .2s ease;
         }
-        #backdrop.open { display: flex; }
+        #backdrop.open { display:flex; }
         #sheet {
-            width: 100%; max-height: 88dvh;
-            background: #fff;
-            border-radius: 26px 26px 0 0;
-            display: flex; flex-direction: column; overflow: hidden;
-            animation: sheet-up .3s cubic-bezier(.34,1.1,.64,1);
+            width:100%; max-height:88dvh; background:#fff;
+            border-radius:26px 26px 0 0;
+            display:flex; flex-direction:column; overflow:hidden;
+            animation:sheet-up .3s cubic-bezier(.34,1.1,.64,1);
         }
 
-        .scroll::-webkit-scrollbar { width: 3px; }
-        .scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .scroll::-webkit-scrollbar { width:3px; }
+        .scroll::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:10px; }
 
-        .rate-portrait  { display: flex; }
-        .rate-landscape { display: none; }
-
-        @media (orientation: landscape) and (max-height: 600px) {
-            .rate-portrait  { display: none; }
-            .rate-landscape { display: flex; }
+        .rate-portrait  { display:flex; }
+        .rate-landscape { display:none; }
+        @media (orientation:landscape) and (max-height:600px) {
+            .rate-portrait  { display:none; }
+            .rate-landscape { display:flex; }
         }
 
-        /* Brand color helpers */
-        .bg-brand    { background-color: #121f48; }
-        .text-brand  { color: #121f48; }
-        .border-brand{ border-color: #121f48; }
-        .bg-brand-light  { background-color: #eef1f8; }
-        .text-brand-light{ color: #8a96bb; }
-        .timer-ring  { stroke: #121f48; }
+        .bg-brand    { background-color:#121f48; }
+        .text-brand  { color:#121f48; }
+
+        /* ── Botón de calificación ── */
+        .rate-opt {
+            display:flex; flex-direction:column; align-items:center; gap:8px;
+            cursor:pointer; border:none; background:none; padding:0;
+            transition:transform .18s cubic-bezier(.34,1.56,.64,1), opacity .18s;
+        }
+        .rate-opt:active { transform:scale(.82) !important; }
+        .rate-box {
+            border-radius:18px; border:2px solid;
+            display:flex; align-items:center; justify-content:center;
+            flex-direction:column; gap:3px;
+            transition:border-color .2s, box-shadow .2s;
+            padding:8px 10px;
+        }
+        .rate-opt:hover .rate-box { box-shadow:0 6px 24px rgba(245,158,11,.3); }
+
+        /* Estrella SVG animada en pantalla gracias */
+        .ty-star { animation: star-pop .4s cubic-bezier(.34,1.56,.64,1) both; opacity:0; }
     </style>
 </head>
 <body>
@@ -103,7 +103,6 @@
          PANTALLA 1 — REPOSO
     ══════════════════════════════════════ --}}
     <div id="s-sleep" class="screen on flex-col items-center justify-center gap-6 p-8 text-center">
-
         <div class="relative flex items-center justify-center" style="width:200px;height:200px;">
             <div class="pulse absolute rounded-full" style="width:200px;height:200px;background:rgba(18,31,72,.07);"></div>
             <div class="pulse absolute rounded-full" style="width:150px;height:150px;background:rgba(18,31,72,.1);animation-delay:.7s;"></div>
@@ -113,7 +112,6 @@
                 <img src="{{ asset('img/logo-solo.png') }}" alt="Logo">
             </div>
         </div>
-
         <div>
             <h1 class="text-2xl font-black text-gray-800 tracking-tight">Vales Agregados</h1>
             <p class="text-gray-400 text-sm mt-1">Gracias por su preferencia</p>
@@ -126,15 +124,14 @@
     </div>
 
     {{-- ══════════════════════════════════════
-         PANTALLA 2 — CALIFICAR · PORTRAIT
+         PANTALLA 2 — CALIFICAR
     ══════════════════════════════════════ --}}
     <div id="s-rate" class="screen off">
 
         {{-- PORTRAIT --}}
         <div class="rate-portrait w-full h-full flex-col items-center justify-between p-5 overflow-y-auto scroll"
-             style="max-width:480px; margin:auto;">
+             style="max-width:480px;margin:auto;">
 
-            {{-- Badge --}}
             <div class="fade-up w-full text-center pt-1" style="animation-delay:.05s">
                 <div class="inline-flex items-center gap-2 text-white text-xs font-black px-4 py-1.5 rounded-full mb-2 bg-brand">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +143,6 @@
                 <p class="text-gray-400 text-xs mt-0.5">Tu pedido está confirmado</p>
             </div>
 
-            {{-- Tarjeta --}}
             <div class="fade-up w-full" style="animation-delay:.12s">
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="px-5 py-3 flex items-center justify-between bg-brand">
@@ -187,37 +183,36 @@
                 </div>
             </div>
 
-            {{-- ── 3 CARITAS portrait ── --}}
+            {{-- ── 3 OPCIONES ESTRELLA portrait ── --}}
             <div class="fade-up w-full text-center" style="animation-delay:.2s">
                 <p class="text-sm font-black text-gray-800 mb-0.5">¿Cómo fue tu experiencia?</p>
-                <p class="text-xs text-gray-400 mb-4">Toca una para calificar</p>
-                <div class="flex items-end justify-center gap-6">
+                <p class="text-xs text-gray-400 mb-5">Toca para calificar</p>
+                <div class="flex items-end justify-center gap-5">
 
-                    {{-- Malo --}}
-                    <button class="face-btn flex flex-col items-center gap-1.5" onclick="rate(1)">
-                        <div class="rounded-2xl bg-red-50 border-2 border-red-100 hover:border-red-300 hover:scale-110 transition-all flex items-center justify-center"
-                             style="width:3.6rem;height:3.6rem;font-size:2rem;">😞</div>
+                    <button class="rate-opt" onclick="rate(1)" data-score="1">
+                        <div class="rate-box" style="background:#fef2f2;border-color:#fecaca;width:3.6rem;height:3.6rem;">
+                            <div id="p-opt-1" class="flex gap-0.5"></div>
+                        </div>
                         <span class="text-[9px] font-black text-red-400 uppercase tracking-wide">Malo</span>
                     </button>
 
-                    {{-- Regular — más grande, es el central --}}
-                    <button class="face-btn flex flex-col items-center gap-1.5" onclick="rate(3)">
-                        <div class="rounded-2xl bg-yellow-50 border-2 border-yellow-200 hover:border-yellow-400 hover:scale-110 transition-all flex items-center justify-center"
-                             style="width:4.2rem;height:4.2rem;font-size:2.4rem;">😐</div>
+                    <button class="rate-opt" onclick="rate(2)" data-score="2">
+                        <div class="rate-box" style="background:#fffbeb;border-color:#fde68a;width:4.2rem;height:4.2rem;">
+                            <div id="p-opt-2" class="flex gap-0.5"></div>
+                        </div>
                         <span class="text-[9px] font-black text-yellow-500 uppercase tracking-wide">Regular</span>
                     </button>
 
-                    {{-- Excelente --}}
-                    <button class="face-btn flex flex-col items-center gap-1.5" onclick="rate(5)">
-                        <div class="rounded-2xl bg-green-50 border-2 border-green-100 hover:border-green-300 hover:scale-110 transition-all flex items-center justify-center"
-                             style="width:3.6rem;height:3.6rem;font-size:2rem;">🤩</div>
+                    <button class="rate-opt" onclick="rate(3)" data-score="3">
+                        <div class="rate-box" style="background:#f0fdf4;border-color:#bbf7d0;width:3.6rem;height:3.6rem;">
+                            <div id="p-opt-3" class="flex gap-0.5"></div>
+                        </div>
                         <span class="text-[9px] font-black text-green-500 uppercase tracking-wide">¡Genial!</span>
                     </button>
 
                 </div>
             </div>
 
-            {{-- Timer portrait --}}
             <div class="fade-up flex flex-col items-center gap-1 pb-1" style="animation-delay:.28s">
                 <div class="relative" style="width:42px;height:42px;">
                     <svg style="width:42px;height:42px;" class="-rotate-90" viewBox="0 0 44 44">
@@ -233,9 +228,8 @@
 
         {{-- LANDSCAPE --}}
         <div class="rate-landscape w-full h-full items-stretch p-3 gap-3 overflow-hidden"
-             style="max-width:900px; margin:auto;">
+             style="max-width:900px;margin:auto;">
 
-            {{-- Col izquierda --}}
             <div class="flex flex-col justify-center gap-3 flex-1 min-w-0">
                 <div class="fade-up flex items-center gap-3" style="animation-delay:.05s">
                     <div class="inline-flex items-center gap-1.5 text-white text-[10px] font-black px-3 py-1.5 rounded-full shrink-0 bg-brand">
@@ -288,28 +282,30 @@
 
             <div class="w-px bg-gray-100 self-stretch mx-1 shrink-0"></div>
 
-            {{-- Col derecha: 3 caritas + timer --}}
             <div class="flex flex-col justify-center items-center gap-4 flex-1 min-w-0">
                 <div class="fade-up text-center" style="animation-delay:.18s">
                     <p class="text-sm font-black text-gray-800 mb-0.5">¿Cómo fue tu experiencia?</p>
-                    <p class="text-[11px] text-gray-400 mb-4">Toca una carita</p>
-                    <div class="flex items-end justify-center gap-5">
+                    <p class="text-[11px] text-gray-400 mb-4">Toca para calificar</p>
+                    <div class="flex items-end justify-center gap-4">
 
-                        <button class="face-btn flex flex-col items-center gap-1.5" onclick="rate(1)">
-                            <div class="rounded-2xl bg-red-50 border-2 border-red-100 hover:border-red-300 hover:scale-110 transition-all flex items-center justify-center"
-                                 style="width:3.2rem;height:3.2rem;font-size:1.8rem;">😞</div>
+                        <button class="rate-opt" onclick="rate(1)" data-score="1">
+                            <div class="rate-box" style="background:#fef2f2;border-color:#fecaca;width:3.2rem;height:3.2rem;">
+                                <div id="l-opt-1" class="flex gap-0.5"></div>
+                            </div>
                             <span class="text-[8px] font-black text-red-400 uppercase">Malo</span>
                         </button>
 
-                        <button class="face-btn flex flex-col items-center gap-1.5" onclick="rate(3)">
-                            <div class="rounded-2xl bg-yellow-50 border-2 border-yellow-200 hover:border-yellow-400 hover:scale-110 transition-all flex items-center justify-center"
-                                 style="width:3.8rem;height:3.8rem;font-size:2.2rem;">😐</div>
+                        <button class="rate-opt" onclick="rate(2)" data-score="2">
+                            <div class="rate-box" style="background:#fffbeb;border-color:#fde68a;width:3.8rem;height:3.8rem;">
+                                <div id="l-opt-2" class="flex gap-0.5"></div>
+                            </div>
                             <span class="text-[8px] font-black text-yellow-500 uppercase">Regular</span>
                         </button>
 
-                        <button class="face-btn flex flex-col items-center gap-1.5" onclick="rate(5)">
-                            <div class="rounded-2xl bg-green-50 border-2 border-green-100 hover:border-green-300 hover:scale-110 transition-all flex items-center justify-center"
-                                 style="width:3.2rem;height:3.2rem;font-size:1.8rem;">🤩</div>
+                        <button class="rate-opt" onclick="rate(3)" data-score="3">
+                            <div class="rate-box" style="background:#f0fdf4;border-color:#bbf7d0;width:3.2rem;height:3.2rem;">
+                                <div id="l-opt-3" class="flex gap-0.5"></div>
+                            </div>
                             <span class="text-[8px] font-black text-green-500 uppercase">¡Genial!</span>
                         </button>
 
@@ -343,7 +339,8 @@
             <h2 class="text-2xl font-black text-gray-800">¡Gracias por tu opinión!</h2>
             <p class="text-gray-400 text-sm">Tu calificación nos ayuda a mejorar</p>
         </div>
-        <div class="fade-up" id="thanks-face" style="animation-delay:.3s;font-size:3.5rem;"></div>
+        {{-- Estrellas grandes animadas --}}
+        <div id="thanks-stars" class="flex justify-center gap-2" style="animation-delay:.3s;"></div>
         <div class="fade-up" style="animation-delay:.45s">
             <p class="font-black text-sm text-brand" id="thanks-msg">Hasta pronto</p>
         </div>
@@ -428,18 +425,62 @@
 
     <script>
     const S = {
-        saleId : null, data: null, timer: null, secs: 120,
-        csrf   : document.querySelector('meta[name="csrf-token"]').content,
+        saleId: null, data: null, timer: null, secs: 120,
+        csrf  : document.querySelector('meta[name="csrf-token"]').content,
     };
 
-    // Sólo 3 calificaciones: 1 = Malo, 3 = Regular, 5 = Excelente
     const MSG = {
-        1: 'Lamentamos tu experiencia. Mejoraremos.',
-        3: 'Gracias por tu comentario.',
-        5: '¡Nos encanta saber que quedaste satisfecho!',
+        1: 'Lamentamos tu experiencia. ¡Mejoraremos para ti!',
+        2: 'Gracias por tu comentario.',
+        3: '¡Nos encanta saber que quedaste satisfecho!',
     };
-    const FACE = { 1:'😞', 3:'😐', 5:'🤩' };
 
+    // ─────────────────────────────────────────────────────────────
+    //  renderStars(value, total, sizePx)
+    //  Genera `total` estrellas SVG. Cada estrella se llena de
+    //  izquierda a derecha de forma proporcional (soporta decimales).
+    //  value=1.7 → 1 llena + 1 a 70% + 1 vacía
+    // ─────────────────────────────────────────────────────────────
+    function renderStars(value, total, sizePx) {
+        const sz  = sizePx || 20;
+        const uid = 'sr' + Math.random().toString(36).slice(2, 7);
+        let html  = '';
+        for (let i = 0; i < total; i++) {
+            const pct = Math.round(Math.min(Math.max(value - i, 0), 1) * 100);
+            const gid = uid + i;
+            html += `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"
+                          style="display:inline-block;flex-shrink:0;vertical-align:middle;">
+                <defs>
+                    <linearGradient id="${gid}" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="${pct}%" stop-color="#f59e0b"/>
+                        <stop offset="${pct}%" stop-color="#d1d5db"/>
+                    </linearGradient>
+                </defs>
+                <path fill="url(#${gid})"
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88
+                         L12 17.77l-6.18 3.25L7 14.14 2 9.27
+                         l6.91-1.01L12 2z"/>
+            </svg>`;
+        }
+        return html;
+    }
+
+    // Inicializa las estrellas fijas de los 3 botones
+    document.addEventListener('DOMContentLoaded', () => {
+        // Portrait
+        document.getElementById('p-opt-1').innerHTML = renderStars(1, 3, 15);
+        document.getElementById('p-opt-2').innerHTML = renderStars(2, 3, 15);
+        document.getElementById('p-opt-3').innerHTML = renderStars(3, 3, 15);
+        // Landscape
+        document.getElementById('l-opt-1').innerHTML = renderStars(1, 3, 13);
+        document.getElementById('l-opt-2').innerHTML = renderStars(2, 3, 13);
+        document.getElementById('l-opt-3').innerHTML = renderStars(3, 3, 13);
+
+        show('s-sleep');
+        if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(() => {});
+    });
+
+    // ─── Navegación de pantallas ───────────────────────────────────
     function show(id) {
         ['s-sleep','s-rate','s-thanks'].forEach(s => {
             const el = document.getElementById(s);
@@ -454,6 +495,7 @@
 
     function fill(sel, val) { document.querySelectorAll(sel).forEach(el => el.textContent = val); }
 
+    // ─── Polling de ventas pendientes ─────────────────────────────
     setInterval(async () => {
         try {
             const r = await fetch('/calificacion/check');
@@ -475,6 +517,7 @@
         startTimer();
     }
 
+    // ─── Modal detalles ───────────────────────────────────────────
     function openDetalles() {
         const d = S.data; if (!d) return;
         stopTimer();
@@ -544,6 +587,7 @@
         if (S.saleId) resumeTimer();
     }
 
+    // ─── Timer ───────────────────────────────────────────────────
     function startTimer()  { clearInterval(S.timer); S.secs = 120; timerUI(120); S.timer = setInterval(tick, 1000); }
     function resumeTimer() { clearInterval(S.timer); S.timer = setInterval(tick, 1000); }
     function stopTimer()   { clearInterval(S.timer); }
@@ -569,19 +613,22 @@
         if (lbl) { lbl.textContent = s; lbl.style.color = c; }
     }
 
+    // ─── Calificar ───────────────────────────────────────────────
     async function rate(score) {
         if (!S.saleId) return;
         stopTimer(); closeDetalles();
-        document.querySelectorAll('.face-btn').forEach(b => {
-            const isSelected = b.getAttribute('onclick') === `rate(${score})`;
-            b.style.transform = isSelected ? 'scale(1.35)' : 'scale(0.75)';
-            b.style.opacity   = isSelected ? '1' : '0.18';
+
+        document.querySelectorAll('.rate-opt').forEach(b => {
+            const sel = parseInt(b.dataset.score) === score;
+            b.style.transform = sel ? 'scale(1.3)' : 'scale(0.72)';
+            b.style.opacity   = sel ? '1' : '0.18';
         });
+
         try {
             await fetch('/calificacion/rate', {
-                method:'POST',
-                headers:{'Content-Type':'application/json','X-CSRF-TOKEN':S.csrf},
-                body:JSON.stringify({sale_id:S.saleId, calificacion:score}),
+                method : 'POST',
+                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':S.csrf},
+                body   : JSON.stringify({sale_id:S.saleId, calificacion:score}),
             });
         } catch(e) {}
         showThanks(score);
@@ -592,17 +639,40 @@
         closeDetalles();
         try {
             await fetch('/calificacion/skip', {
-                method:'POST',
-                headers:{'Content-Type':'application/json','X-CSRF-TOKEN':S.csrf},
-                body:JSON.stringify({sale_id:S.saleId}),
+                method : 'POST',
+                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':S.csrf},
+                body   : JSON.stringify({sale_id:S.saleId}),
             });
         } catch(e) {}
         goSleep();
     }
 
     function showThanks(score) {
-        document.getElementById('thanks-face').textContent = FACE[score] || '😊';
-        document.getElementById('thanks-msg').textContent  = MSG[score] || 'Hasta pronto';
+        // Estrellas grandes con animación escalonada
+        const container = document.getElementById('thanks-stars');
+        container.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            const pct = Math.round(Math.min(Math.max(score - i, 0), 1) * 100);
+            const gid = 'tsg' + i;
+            const wrap = document.createElement('div');
+            wrap.className = 'ty-star';
+            wrap.style.animationDelay = (i * 0.12) + 's';
+            wrap.innerHTML = `<svg width="52" height="52" viewBox="0 0 24 24">
+                <defs>
+                    <linearGradient id="${gid}" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="${pct}%" stop-color="#f59e0b"/>
+                        <stop offset="${pct}%" stop-color="#e5e7eb"/>
+                    </linearGradient>
+                </defs>
+                <path fill="url(#${gid})"
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88
+                         L12 17.77l-6.18 3.25L7 14.14 2 9.27
+                         l6.91-1.01L12 2z"/>
+            </svg>`;
+            container.appendChild(wrap);
+        }
+
+        document.getElementById('thanks-msg').textContent = MSG[score] || 'Hasta pronto';
         show('s-thanks');
         S.saleId = null; S.data = null;
         setTimeout(goSleep, 4000);
@@ -610,14 +680,9 @@
 
     function goSleep() {
         stopTimer(); S.saleId = null; S.data = null;
-        document.querySelectorAll('.face-btn').forEach(b => { b.style.transform = ''; b.style.opacity = ''; });
+        document.querySelectorAll('.rate-opt').forEach(b => { b.style.transform = ''; b.style.opacity = ''; });
         show('s-sleep');
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        show('s-sleep');
-        if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(() => {});
-    });
     </script>
 </body>
 </html>
